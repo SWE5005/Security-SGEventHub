@@ -1,0 +1,124 @@
+name: sg-event-hub
+
+services:
+    keycloak-db:
+        image: postgres:17.0
+        environment:
+            - POSTGRES_DB=keycloak
+            - POSTGRES_USER=${DEV_USER}
+            - POSTGRES_PASSWORD=${DEV_PASSWORD}
+        expose:
+            - 5432
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 3s
+        volumes:
+            - keycloak-db-volume:/var/lib/postgresql/data
+    keycloak:
+        # labels:
+        #     - traefik.enable=true
+        #     - traefik.http.routers.keycloak.rule=Host(`keycloak.${DEV_DOMAIN}`)
+        #     - traefik.http.routers.keycloak.middlewares=permissive-headers
+        #     - traefik.http.services.keycloak.loadBalancer.server.port=8080
+        image: keycloak/keycloak:26.1
+        command: -v start --import-realm
+        environment:
+            - KC_BOOTSTRAP_ADMIN_USERNAME=${DEV_USER}
+            - KC_BOOTSTRAP_ADMIN_PASSWORD=${DEV_PASSWORD}
+            - KC_DB=postgres
+            - KC_DB_URL_DATABASE=keycloak
+            - KC_DB_USERNAME=${DEV_USER}
+            - KC_DB_PASSWORD=${DEV_PASSWORD}
+            - KC_DB_URL_HOST=keycloak-db # use internal address / docker network alias
+            - KC_DB_URL_PORT=5432
+            - KC_HTTP_ENABLED=true
+            - KC_HOSTNAME=http://localhost:8080
+            - KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
+            - KC_HTTP_PORT=8080
+            - KC_HEALTH_ENABLED=true
+            - KC_PROXY_HEADERS=xforwarded
+            - DEFAULT_REALM=sgeh
+            - DEV_USER=${DEV_USER}
+            - DEV_PASSWORD=${DEV_PASSWORD}
+        healthcheck:
+            test: "exec 3<>/dev/tcp/localhost/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3;cat <&3 | grep -q '\"status\": \"UP\"' && exit 0 || exit 1"
+            interval: 10s
+            timeout: 5s
+            retries: 30 # keycloak might take a long time to initialize
+        volumes:
+            - ./keycloak:/opt/keycloak/data/import
+        expose:
+            - 8080
+        ports:
+            - 8080:8080
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: on-failure
+                delay: 3s
+        depends_on:
+            keycloak-db:
+                condition: service_started
+    sgeh-db:
+        image: postgres:17
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_DB: sgeh
+            POSTGRES_USER: ${DEV_USER}
+            POSTGRES_PASSWORD: ${DEV_PASSWORD}
+        deploy:
+            replicas: 1
+        volumes:
+            - sgeh-db-volume:/var/lib/postgresql/data
+    sgeh-user-manager:
+        image: user-manager:2.0
+        build:
+            context: ./user-manager
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
+        hostname: user-manager
+        container_name: user-manager
+        ports:
+            - "8081:8080"
+        deploy:
+            replicas: 1
+    sgeh-event-manager:
+        image: event-manager:2.0
+        build:
+            context: ./event-manager
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
+        hostname: event-manager
+        container_name: event-manager
+        ports:
+            - "8082:8080"
+        deploy:
+            replicas: 1
+    sgeh-web:
+        image: sgeh-web:2.0
+        build:
+            context: ./sgevent-ui
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
+        hostname: sgeh-web
+        container_name: sgeh-web
+        environment:
+            - GATSBY_USER_MANAGER_API_URL=http://sgeh-user-manager:8080/
+            - GATSBY_EVENT_MANAGER_API_URL=http://sgeh-event-manager:8080/
+            - GATSBY_ONE_MAP_API_URL=https://www.onemap.gov.sg/api/common/elastic
+        ports:
+            - "8000:8000"
+        deploy:
+            replicas: 1
+volumes:
+    sgeh-db-volume:
+    keycloak-db-volume:

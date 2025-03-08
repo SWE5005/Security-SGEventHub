@@ -1,53 +1,53 @@
-# sgEvent-ui
+# SG Event Hub - Web
 
-UI repo for SG community event app
+This folder contains the source code for the SG Event Hub web server. The web server uses a React-based static site
+generation framework called Gatsby.
 
-<p align="center">
-  <a href="https://www.gatsbyjs.com/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter">
-    <img alt="Gatsby" src="https://www.gatsbyjs.com/Gatsby-Monogram.svg" width="60" />
-  </a>
-</p>
-<h1 align="center">
-  Gatsby Minimal Starter
-</h1>
+Read more about Gatsby: https://www.gatsbyjs.com/
 
-## 🚀 Quick start
+## Quickstart
 
-1.  **Create a Gatsby site.**
+## 1. Run the local development infrastructure
 
-    Use the Gatsby CLI to create a new site, specifying the minimal starter.
+The docker-compose file at the root directory contains definitions to run all the backend services required for the
+web server to run.
 
-    ```shell
-    # create a new Gatsby site using the minimal starter
-    npm init gatsby
-    ```
+```bash
+docker-compose up -d
+```
 
-2.  **Start developing.**
+## 2. Run the Gatsby development server
 
-    Navigate into your new site’s directory and start it up.
+1. Navigate to the web server
 
-    ```shell
-    cd my-gatsby-site/
-    npm run develop
-    ```
+```bash
+cd sgevent-ui
+```
 
-3.  **Open the code and start customizing!**
+The `.env.development.template` file is a reference `.env` file to use for development.
 
-    Your site is now running at http://localhost:8000!
+2. Run the following command to copy and rename the `.env.development.template` file
 
-    Edit `src/pages/index.js` to see your site update in real-time!
+```bash
+cp .env.development.template .env.developemt
+```
 
-4.  **Learn more**
+3. Install npm packages
 
-    - [Documentation](https://www.gatsbyjs.com/docs/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
-    - [Tutorials](https://www.gatsbyjs.com/docs/tutorial/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
-    - [Guides](https://www.gatsbyjs.com/docs/how-to/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
-    - [API Reference](https://www.gatsbyjs.com/docs/api-reference/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
-    - [Plugin Library](https://www.gatsbyjs.com/plugins?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
-    - [Cheat Sheet](https://www.gatsbyjs.com/docs/cheat-sheet/?utm_source=starter&utm_medium=readme&utm_campaign=minimal-starter)
+Use your favourite package manager (yarn, npm etc.)
 
-## 🚀 Quick start (Netlify)
+```bash
+yarn
+```
 
-Deploy this starter with one click on [Netlify](https://app.netlify.com/signup):
+or
 
-[<img src="https://www.netlify.com/img/deploy/button.svg" alt="Deploy to Netlify" />](https://app.netlify.com/start/deploy?repository=https://github.com/gatsbyjs/gatsby-starter-minimal)
+```bash
+npm install
+```
+
+4. Run Gatsby in development mode:
+
+```bash
+npm run develop
+```
