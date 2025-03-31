@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <property name="generate_uuid" value="gen_random_uuid()" dbms="postgresql"/>
+
+    <changeSet id="20250331-CREATE-ROLE-TABLE" author="kaidi">
+        <createTable tableName="roles">
+            <column name="id" type="UUID" autoIncrement="false" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet  id="20250331-INSERT-ROLES" author="kaidi">
+        <sql>
+            INSERT INTO roles (id, name)
+            VALUES
+            (${generate_uuid}, 'SUPER_ADMIN'),
+            (${generate_uuid}, 'EVENT_ADMIN'),
+            (${generate_uuid}, 'MEMBER')
+        </sql>
+    </changeSet>
+    
+    <changeSet id="20250331-CREATE-EVENT-TABLE" author="kaidi">
+        <createTable tableName="events">
+            <column name="id" type="UUID" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <!--<constraints nullable="false"/>-->
+            </column>
+            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="location" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="capacity" type="integer"/>
+            <column name="status" type="varchar(50)"/>
+            <column name="owner_id" type="UUID"/>
+            <column name="cover" type="text"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="20250331-CREATE-USER-TABLE" author="kaidi">
+        <createTable tableName="users">
+            <column name="id" type="UUID" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email_address" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active_status" type="varchar(50)"/>
+            <column name="role_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+<!--        <addForeignKeyConstraint constraintName="FK_MEDIA_UUID"-->
+<!--                                 baseTableName="IMAGE" baseColumnNames="UUID"-->
+<!--                                 referencedTableName="MEDIA" referencedColumnNames="UUID"-->
+<!--        />-->
+    </changeSet>
+
+    <changeSet id="20250331-USER-TABLE-FK" author="kaidi">
+        <addForeignKeyConstraint baseTableName="users"
+                                 baseColumnNames="role_id"
+                                 constraintName="fk_user_role_id"
+                                 referencedTableName="roles"
+                                 referencedColumnNames="id"
+        />
+    </changeSet>
+    
+    <changeSet id="20250331-CREATE-EVENT-REGISTRATION-TABLE" author="kaidi">
+        <createTable tableName="event_registration">
+            <column name="id" type="UUID" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="event_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="register_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250331-EVENT-REGISTRATION-TABLE-FK" author="kaidi">
+        <addForeignKeyConstraint baseTableName="event_registration"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_event_registration_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+        />
+    </changeSet>
+    
+    <changeSet id="20250331-CREATE-FEEDBACK-TABLE" author="ingimar">
+        <createTable tableName="feedback">
+            <column name="id" type="UUID" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating" type="integer"/>
+            <column name="comment" type="text"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250331-FEEDBACK-TABLE-FK" author="kaidi">
+        <addForeignKeyConstraint baseTableName="feedback"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_feedback_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+        />
+    </changeSet>
+    
+</databaseChangeLog>
+
