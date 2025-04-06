@@ -5,6 +5,32 @@ generation framework called Gatsby.
 
 Read more about Gatsby: https://www.gatsbyjs.com/
 
+## Authentication
+
+This application uses Keycloak for authentication via OpenID Connect (OIDC) Authorization Code Flow.
+
+### Authentication Flow
+
+1. User clicks "Login" or "Sign Up" button
+2. User is redirected to the Keycloak login page
+3. After successful authentication, Keycloak redirects back to the application
+4. The application verifies the authentication token and sets an HTTP-only cookie
+5. The user is now authenticated and can access protected resources
+
+### Environment Variables
+
+The following environment variables are required for authentication:
+
+```
+# Keycloak OIDC Configuration
+GATSBY_KEYCLOAK_URL=http://localhost:8080/realms/sgeventhub
+GATSBY_KEYCLOAK_CLIENT_ID=sgevent-ui
+GATSBY_KEYCLOAK_CLIENT_SECRET=your-client-secret
+GATSBY_REDIRECT_URI=http://localhost:8000/api/auth/callback
+GATSBY_LOGOUT_REDIRECT_URI=http://localhost:8000/login
+GATSBY_COOKIE_SECRET=your-cookie-secret
+```
+
 ## Quickstart
 
 ## 1. Run the local development infrastructure
@@ -51,3 +77,14 @@ npm install
 ```bash
 npm run develop
 ```
+
+## Keycloak Setup
+
+1. Create a Keycloak realm (e.g., "sgeventhub")
+2. Create a client (e.g., "sgevent-ui")
+3. Configure the client:
+   - Access Type: confidential
+   - Valid Redirect URIs: http://localhost:8000/api/auth/callback
+   - Web Origins: http://localhost:8000
+4. Get the client secret from the "Credentials" tab
+5. Update the .env file with the client secret

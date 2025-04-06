@@ -73,20 +73,20 @@ services:
             replicas: 1
         volumes:
             - sgeh-db-volume:/var/lib/postgresql/data
-    sgeh-user-manager:
-        image: user-manager:2.0
-        build:
-            context: ./user-manager
-            dockerfile: Dockerfile
-            args:
-                - APP_VERSION=${APP_VERSION}
-                - REVISION=${REVISION}
-        hostname: user-manager
-        container_name: user-manager
-        ports:
-            - "8081:8080"
-        deploy:
-            replicas: 1
+    # sgeh-user-manager:
+    #     image: user-manager:2.0
+    #     build:
+    #         context: ./user-manager
+    #         dockerfile: Dockerfile
+    #         args:
+    #             - APP_VERSION=${APP_VERSION}
+    #             - REVISION=${REVISION}
+    #     hostname: user-manager
+    #     container_name: user-manager
+    #     ports:
+    #         - "8081:8080"
+    #     deploy:
+    #         replicas: 1
     sgeh-event-manager:
         image: event-manager:2.0
         build:
