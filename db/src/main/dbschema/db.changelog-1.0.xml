@@ -6,26 +6,6 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <property name="generate_uuid" value="gen_random_uuid()" dbms="postgresql"/>
 
-    <changeSet id="20250331-CREATE-ROLE-TABLE" author="kaidi">
-        <createTable tableName="roles">
-            <column name="id" type="UUID" autoIncrement="false" >
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="varchar(50)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <changeSet  id="20250331-INSERT-ROLES" author="kaidi">
-        <sql>
-            INSERT INTO roles (id, name)
-            VALUES
-            (${generate_uuid}, 'SUPER_ADMIN'),
-            (${generate_uuid}, 'EVENT_ADMIN'),
-            (${generate_uuid}, 'MEMBER')
-        </sql>
-    </changeSet>
     
     <changeSet id="20250331-CREATE-EVENT-TABLE" author="kaidi">
         <createTable tableName="events">
@@ -38,7 +18,7 @@
             <column name="description" type="varchar(255)">
                 <!--<constraints nullable="false"/>-->
             </column>
-            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="start_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
@@ -68,14 +48,17 @@
             <column name="password" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="mobile_number" type="integer">
+                <constraints nullable="false"/>
+            </column>
             <column name="email_address" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="active_status" type="varchar(50)"/>
-            <column name="role_id" type="UUID">
+            <column name="roles" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE">
+            <column name="create_datetime" type="TIMESTAMP WITHOUT TIME ZONE" defaultValueComputed="CURRENT_TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -85,14 +68,16 @@
 <!--        />-->
     </changeSet>
 
-    <changeSet id="20250331-USER-TABLE-FK" author="kaidi">
-        <addForeignKeyConstraint baseTableName="users"
-                                 baseColumnNames="role_id"
-                                 constraintName="fk_user_role_id"
-                                 referencedTableName="roles"
-                                 referencedColumnNames="id"
-        />
+    <changeSet  id="20250331-INSERT-USER" author="kaidi">
+        <sql>
+            INSERT INTO users (id, name, password, mobile_number, email_address, active_status, roles)
+            VALUES
+            (${generate_uuid}, 'Admin','password@123',81261231,'admin@nus.com','ACTIVE','SUPER_ADMIN'),
+            (${generate_uuid}, 'EventAdmin','password@123',81261231,'eventadmin@nus.com','ACTIVE','EVENT_MANAGER'),
+            (${generate_uuid}, 'EndUser','password@123',81261231,'user@nus.com','ACTIVE','END_USER')
+        </sql>
     </changeSet>
+
     
     <changeSet id="20250331-CREATE-EVENT-REGISTRATION-TABLE" author="kaidi">
         <createTable tableName="event_registration">
