@@ -5,6 +5,7 @@ import lombok.*;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -47,5 +48,8 @@ public class UserInfoEntity {
 	@NotNull
 	@Column(name = "create_datetime", nullable = false)
 	private LocalDateTime createDateTime;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<RefreshTokenEntity> refreshTokens;
 
 }

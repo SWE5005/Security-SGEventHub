@@ -68,16 +68,6 @@
 <!--        />-->
     </changeSet>
 
-    <changeSet  id="20250331-INSERT-USER" author="kaidi">
-        <sql>
-            INSERT INTO users (id, name, password, mobile_number, email_address, active_status, roles)
-            VALUES
-            (${generate_uuid}, 'Admin','password@123',81261231,'admin@nus.com','ACTIVE','SUPER_ADMIN'),
-            (${generate_uuid}, 'EventAdmin','password@123',81261231,'eventadmin@nus.com','ACTIVE','EVENT_MANAGER'),
-            (${generate_uuid}, 'EndUser','password@123',81261231,'user@nus.com','ACTIVE','END_USER')
-        </sql>
-    </changeSet>
-
     
     <changeSet id="20250331-CREATE-EVENT-REGISTRATION-TABLE" author="kaidi">
         <createTable tableName="event_registration">

@@ -9,6 +9,9 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import edu.nus.microservice.auth_manager.component.CustomAuthProvider;
 import edu.nus.microservice.auth_manager.config.jwtConfig.JwtAccessTokenFilter;
+import edu.nus.microservice.auth_manager.config.jwtConfig.JwtRefreshTokenFilter;
+import edu.nus.microservice.auth_manager.repository.RefreshTokenRepo;
+import edu.nus.microservice.auth_manager.service.impl.LogoutHandlerServiceImpl;
 import edu.nus.microservice.auth_manager.utils.JwtTokenUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +51,10 @@ public class SpringSecurityConfig {
     private CustomAuthProvider customAuthProvider;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
+    @Autowired
+    private final RefreshTokenRepo refreshTokenRepo;
+    @Autowired
+    private final LogoutHandlerServiceImpl logoutHandlerService;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -84,7 +91,27 @@ public class SpringSecurityConfig {
                 .build();
     }
 
+
     @Order(3)
+    @Bean
+    public SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
+        return httpSecurity
+                .securityMatcher(new AntPathRequestMatcher("/api/auth/refresh-token/**"))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord,jwtTokenUtils,refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> {
+                    log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}",ex);
+                    ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+                    ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
+                })
+                .httpBasic(withDefaults())
+                .build();
+    }
+
+    @Order(4)
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception{
         return httpSecurity
@@ -102,7 +129,7 @@ public class SpringSecurityConfig {
                 .build();
     }
 
-    @Order(4)
+    @Order(5)
     @Bean
     public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -114,6 +141,7 @@ public class SpringSecurityConfig {
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord,jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
+                        .addLogoutHandler(logoutHandlerService)
                         .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 )
                 .exceptionHandling(ex -> {

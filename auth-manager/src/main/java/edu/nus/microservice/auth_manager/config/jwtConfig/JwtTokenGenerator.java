@@ -34,7 +34,7 @@ public class JwtTokenGenerator {
         String permissions = getPermissionsFromRoles(roles);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("atquil")
+                .issuer("nus-iss")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(15 , ChronoUnit.MINUTES))
                 .subject(authentication.getName())
@@ -64,6 +64,21 @@ public class JwtTokenGenerator {
         }
 
         return String.join(" ", permissions);
+    }
+
+    public String generateRefreshToken(Authentication authentication) {
+
+        log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation Started for:{}", authentication.getName());
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("nus-iss")
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(15 , ChronoUnit.DAYS))
+                .subject(authentication.getName())
+                .claim("scope", "REFRESH_TOKEN")
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
 }

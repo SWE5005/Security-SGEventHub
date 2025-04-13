@@ -2,12 +2,15 @@ package edu.nus.microservice.auth_manager.controller;
 
 import edu.nus.microservice.auth_manager.dto.UserRegistrationRequest;
 import edu.nus.microservice.auth_manager.service.impl.AuthServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -24,9 +27,9 @@ public class AuthController {
     private final AuthServiceImpl authService;
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> authenticateUser(Authentication authentication){
+    public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response){
 
-        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication));
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
     }
 
     @PostMapping("/sign-up")
@@ -42,6 +45,12 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
         return ResponseEntity.ok(authService.registerUser(userRegistrationRequest));
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
+    @PostMapping ("/refresh-token")
+    public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
     }
 
 
