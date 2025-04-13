@@ -1,6 +1,7 @@
 package edu.nus.microservice.auth_manager.config.jwtConfig;
 
 
+import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -25,7 +26,7 @@ public class JwtTokenGenerator {
 
     private final JwtEncoder jwtEncoder;
 
-    public String generateAccessToken(Authentication authentication) {
+    public String generateAccessToken(Authentication authentication, UserInfoEntity userInfo) {
 
         log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
 
@@ -39,6 +40,7 @@ public class JwtTokenGenerator {
                 .expiresAt(Instant.now().plus(15 , ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
+                .claim("userid",userInfo.getId())
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

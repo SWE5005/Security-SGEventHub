@@ -41,12 +41,12 @@ public class AuthServiceImpl implements AuthService {
         try
         {
 
-            var userInfoEntity = userRepository.findByEmailAddress(authentication.getName())
+            UserInfoEntity userInfoEntity = userRepository.findByEmailAddress(authentication.getName())
                     .orElseThrow(()->{
                         log.error("[AuthService:userSignInAuth] User :{} not found",authentication.getName());
                         return new ResponseStatusException(HttpStatus.NOT_FOUND,"USER NOT FOUND ");});
 
-            String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+            String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
 
             creatRefreshTokenCookie(response,refreshToken);
@@ -100,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
             Authentication authentication = createAuthenticationObject(userDetailsEntity);
 
             // Generate a JWT token
-            String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+            String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userDetailsEntity);
 
             UserInfoEntity savedUserDetails = userRepository.save(userDetailsEntity);
 
@@ -139,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication =  createAuthenticationObject(userInfoEntity);
 
         //Use the authentication object to generate new accessToken as the Authentication object that we will have may not contain correct role.
-        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+        String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
 
         return  AuthResponse.builder()
                 .accessToken(accessToken)
