@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
     private final EventService eventService;
 
-    @PreAuthorize("hasAuthority('SCOPE_EVENT')")
+    @PreAuthorize("hasAnyAuthority('SCOPE_READ','SCOPE_EVENT')")
     @GetMapping (path="/all")
     public ResponseEntity<?> getAllEvents(Authentication authentication) {
         log.info("[EventController:getAllEvents]Request to get event list started for user: ",authentication.getName());

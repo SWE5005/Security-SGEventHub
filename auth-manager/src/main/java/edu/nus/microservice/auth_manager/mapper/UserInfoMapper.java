@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class UserInfoMapper {
 
     public UserInfoEntity mapUserRegistrationToUserInfoEntity(UserRegistrationRequest userRegistrationRequest) {
         UserInfoEntity userInfoEntity = new UserInfoEntity();
+        userInfoEntity.setId(UUID.randomUUID());
         userInfoEntity.setUsername(userRegistrationRequest.getUserName());
         userInfoEntity.setEmailAddress(userRegistrationRequest.getUserEmail());
         userInfoEntity.setMobileNumber(userRegistrationRequest.getUserMobileNo());
