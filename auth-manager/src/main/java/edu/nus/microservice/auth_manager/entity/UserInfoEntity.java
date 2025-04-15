@@ -30,15 +30,15 @@ public class UserInfoEntity {
 	private String password;
 
 	@NotNull
-	@Column(name = "email_address", nullable = false)
+	@Column(name = "emailAddress", nullable = false)
 	private String emailAddress;
 
 	@NotNull
-	@Column(name = "active_status", nullable = false)
+	@Column(name = "activeStatus", nullable = false)
 	private String activeStatus;
 
 	@NotNull
-	@Column(name = "mobile_number", nullable = false)
+	@Column(name = "mobileNumber", nullable = false)
 	private String mobileNumber;
 
 	@NotNull
@@ -47,9 +47,11 @@ public class UserInfoEntity {
 
 	@NotNull
 	@Column(name = "create_datetime", nullable = false)
-	private LocalDateTime createDateTime;
+	private LocalDateTime createDatetime;
 
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<RefreshTokenEntity> refreshTokens;
 
+	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<EventEntity> managedEvents;
 }
