@@ -6,13 +6,13 @@ import { useSelector } from "react-redux";
 import { navigate } from "gatsby";
 
 export default function Login() {
-  const [requestLogin, { isError }] = useLoginMutation();
+  const [requestLogin, result] = useLoginMutation();
   const { isLoggedIn } = useSelector((state) => authSelector(state));
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
 
   const onLogin = useCallback(() => {
-    requestLogin({ emailAddress, password });
+    navigate("http://localhost:8083/oauth2/authorize/google");
   }, [emailAddress, password]);
 
   useEffect(() => {
@@ -20,6 +20,12 @@ export default function Login() {
       navigate("/home");
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (result) {
+      console.log(result);
+    }
+  }, [result]);
 
   return isLoggedIn ? null : (
     <Grid
@@ -60,9 +66,9 @@ export default function Login() {
       </Grid>
       <Grid item xs={12} sx={{ width: "75%", mt: 3, mb: 4 }}>
         <Button variant="contained" color="primary" onClick={onLogin} fullWidth>
-          Login
+          Login with Google
         </Button>
-        {isError && (
+        {result.isError && (
           <Typography color="error" sx={{ mt: 1 }}>
             Login failed. Please try again.
           </Typography>
