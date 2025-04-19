@@ -27,57 +27,58 @@ import java.io.IOException;
 
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAccessTokenFilter extends OncePerRequestFilter {
-
-    private final RSAKeyRecord rsaKeyRecord;
-    private final JwtTokenUtils jwtTokenUtils;
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-
-        try{
-            log.info("[JwtAccessTokenFilter:doFilterInternal] :: Started ");
-
-            log.info("[JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:{}",request.getRequestURI());
-
-            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-            JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
-
-            if(!authHeader.startsWith(TokenType.Bearer.name())){
-                filterChain.doFilter(request,response);
-                return;
-            }
-
-            final String token = authHeader.substring(7);
-            final Jwt jwtToken = jwtDecoder.decode(token);
-
-
-            final String userName = jwtTokenUtils.getUserName(jwtToken);
-
-            if(!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null){
-
-                UserDetails userDetails = jwtTokenUtils.userDetails(userName);
-                if(jwtTokenUtils.isTokenValid(jwtToken,userDetails)){
-                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-
-                    UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-                    createdToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    securityContext.setAuthentication(createdToken);
-                    SecurityContextHolder.setContext(securityContext);
-                }
-            }
-            log.info("[JwtAccessTokenFilter:doFilterInternal] Completed");
-
-            filterChain.doFilter(request,response);
-        }catch (JwtValidationException jwtValidationException){
-            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,jwtValidationException.getMessage());
-        }
-    }
+public class JwtAccessTokenFilter{
+//public class JwtAccessTokenFilter extends OncePerRequestFilter {
+//
+//    private final RSAKeyRecord rsaKeyRecord;
+//    private final JwtTokenUtils jwtTokenUtils;
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request,
+//                                    HttpServletResponse response,
+//                                    FilterChain filterChain) throws ServletException, IOException {
+//
+//        try{
+//            log.info("[JwtAccessTokenFilter:doFilterInternal] :: Started ");
+//
+//            log.info("[JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:{}",request.getRequestURI());
+//
+//            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+//
+//            JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
+//
+//            if(!authHeader.startsWith(TokenType.Bearer.name())){
+//                filterChain.doFilter(request,response);
+//                return;
+//            }
+//
+//            final String token = authHeader.substring(7);
+//            final Jwt jwtToken = jwtDecoder.decode(token);
+//
+//
+//            final String userName = jwtTokenUtils.getUserName(jwtToken);
+//
+//            if(!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null){
+//
+//                UserDetails userDetails = jwtTokenUtils.userDetails(userName);
+//                if(jwtTokenUtils.isTokenValid(jwtToken,userDetails)){
+//                    SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+//
+//                    UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
+//                            userDetails,
+//                            null,
+//                            userDetails.getAuthorities()
+//                    );
+//                    createdToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                    securityContext.setAuthentication(createdToken);
+//                    SecurityContextHolder.setContext(securityContext);
+//                }
+//            }
+//            log.info("[JwtAccessTokenFilter:doFilterInternal] Completed");
+//
+//            filterChain.doFilter(request,response);
+//        }catch (JwtValidationException jwtValidationException){
+//            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
+//            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,jwtValidationException.getMessage());
+//        }
+//    }
 }

@@ -5,16 +5,19 @@ import { HOME_MAPPING } from "../constants/index.js";
 import { navigate } from "gatsby";
 
 export default function Home() {
-	const { isLoggedIn, userInfo } = useSelector((state) => authSelector(state));
+  React.useEffect(() => {
+    navigate("/events");
+  }, []);
+  // const { isLoggedIn, userInfo } = useSelector((state) => authSelector(state));
 
-	React.useEffect(() => {
-		if (isLoggedIn && userInfo && userInfo.roleId) {
-			const link = HOME_MAPPING[userInfo.roleId];
-			navigate(link);
-		} else {
-			navigate("/login"); // 如果未登录或用户信息不完整，重定向到登录页面
-		}
-	}, [isLoggedIn, userInfo]);
+  // React.useEffect(() => {
+  // 	if (isLoggedIn && userInfo && userInfo.roleId) {
+  // 		const link = HOME_MAPPING[userInfo.roleId];
+  // 		navigate(link);
+  // 	} else {
+  // 		navigate("/login"); // 如果未登录或用户信息不完整，重定向到登录页面
+  // 	}
+  // }, [isLoggedIn, userInfo]);
 
-	return null;
+  return null;
 }
