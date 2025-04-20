@@ -2,11 +2,13 @@ import React from "react";
 import { authSelector } from "../state/auth/slice";
 import { useSelector } from "react-redux";
 import { HOME_MAPPING } from "../constants/index.js";
+import { useLoginMutation } from "../services/auth.service";
 import { navigate } from "gatsby";
 
 export default function Home() {
+  const [requestLogin, result] = useLoginMutation();
   React.useEffect(() => {
-    navigate("/events");
+    requestLogin();
   }, []);
   // const { isLoggedIn, userInfo } = useSelector((state) => authSelector(state));
 

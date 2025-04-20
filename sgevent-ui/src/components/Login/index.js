@@ -12,7 +12,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
 
   const onLogin = useCallback(() => {
-    navigate("http://localhost:8083/oauth2/authorize/google");
+    navigate("http://localhost:8083/oauth2/authorization/google");
   }, [emailAddress, password]);
 
   useEffect(() => {

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class CustomAuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
 
     @Autowired
     private ManageUserService userService;
+
     @Autowired
     private UserInfoMapper userInfoMapper;
 
@@ -43,26 +45,29 @@ public class CustomAuthSuccessHandler extends SavedRequestAwareAuthenticationSuc
             Map<String, Object> attributes = principal.getAttributes();
             String email = attributes.getOrDefault("email", "").toString();
             String name = attributes.getOrDefault("name", "").toString();
-            userService.findByEmail(email)
-                    .ifPresentOrElse(user -> {
-                        DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(user.getRoles())),
-                                attributes, "email");
-                        Authentication securityAuth = new OAuth2AuthenticationToken(newUser, List.of(new SimpleGrantedAuthority(user.getRoles())),
-                                oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
-                        SecurityContextHolder.getContext().setAuthentication(securityAuth);
-                    }, () -> {
-                        UserInfoEntity userEntity = userInfoMapper.mapGoogleUserToUserInfoEntity(email,name);
-                        userService.saveUser(userEntity);
-                        DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
-                                attributes, "email");
-                        Authentication securityAuth = new OAuth2AuthenticationToken(newUser, List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
-                                oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
-                        SecurityContextHolder.getContext().setAuthentication(securityAuth);
-                    });
-        }
-        this.setAlwaysUseDefaultTargetUrl(true);
-        this.setDefaultTargetUrl(frontendUrl+"/home");
-        super.onAuthenticationSuccess(request, response, authentication);
+            UserInfoEntity userEntity;
+            Optional<UserInfoEntity> existingUserEntity = userService.findByEmail(email);
 
+            if(existingUserEntity.isEmpty()){
+                UserInfoEntity newUserEntity = userInfoMapper.mapGoogleUserToUserInfoEntity(email,name);
+                userService.saveUser(newUserEntity);
+                userEntity = newUserEntity;
+            }else{
+                userEntity = existingUserEntity.get();
+            }
+            DefaultOAuth2User newUser = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
+                    attributes, "email");
+            Authentication securityAuth = new OAuth2AuthenticationToken(newUser, List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
+                    oAuth2AuthenticationToken.getAuthorizedClientRegistrationId());
+            SecurityContextHolder.getContext().setAuthentication(securityAuth);
+
+            getRedirectStrategy().sendRedirect(request, response,
+                    frontendUrl+"/home");
+        }else {
+            this.setAlwaysUseDefaultTargetUrl(true);
+            this.setDefaultTargetUrl(frontendUrl + "/home");
+            super.onAuthenticationSuccess(request, response, authentication);
+        }
     }
+
 }

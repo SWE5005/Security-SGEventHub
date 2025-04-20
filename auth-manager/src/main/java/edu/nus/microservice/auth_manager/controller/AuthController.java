@@ -24,34 +24,36 @@ import java.util.List;
 @Slf4j
 public class AuthController {
 
-//    private final AuthServiceImpl authService;
-//
-//    @PostMapping("/sign-in")
-//    public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response){
-//
-//        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
-//    }
-//
-//    @PostMapping("/sign-up")
-//    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationRequest userRegistrationRequest,
-//                                          BindingResult bindingResult){
-//
-//        log.info("[AuthController:registerUser]Signup Process Started for user:{}",userRegistrationRequest.getUserEmail());
-//        if (bindingResult.hasErrors()) {
-//            List<String> errorMessage = bindingResult.getAllErrors().stream()
-//                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-//                    .toList();
-//            log.error("[AuthController:registerUser]Errors in user:{}",errorMessage);
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
-//        }
-//        return ResponseEntity.ok(authService.registerUser(userRegistrationRequest));
-//    }
-//
-//    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
-//    @PostMapping ("/refresh-token")
-//    public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
-//        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
-//    }
+    private final AuthServiceImpl authService;
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response){
+
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
+    }
+
+    @PostMapping("/sign-up")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationRequest userRegistrationRequest,
+                                          BindingResult bindingResult){
+
+        log.info("[AuthController:registerUser]Signup Process Started for user:{}",userRegistrationRequest.getUserEmail());
+        if (bindingResult.hasErrors()) {
+            List<String> errorMessage = bindingResult.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            log.error("[AuthController:registerUser]Errors in user:{}",errorMessage);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+        }
+        return ResponseEntity.ok(authService.registerUser(userRegistrationRequest));
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
+    @PostMapping ("/refresh-token")
+    public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
+    }
+
+
 
 
 }

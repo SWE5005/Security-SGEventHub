@@ -25,4 +25,7 @@ public class AuthResponse {
     @JsonProperty("user_name")
     private String userName;
 
+    @JsonProperty("email_address")
+    private String emailAddress;
+
 }
