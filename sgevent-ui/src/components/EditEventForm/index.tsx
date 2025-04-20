@@ -12,6 +12,7 @@ import QuantityInput from "../QuantityInput";
 import InputFileUpload from "../FileUploader";
 import LocationSelect from "../LocationSelect";
 import ChipList from "../ChipList";
+import dayjs from "dayjs";
 
 export interface EditEventFormProps {
   value: any;
@@ -60,10 +61,10 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
           label="Event Cover"
           disabled={type !== "edit" && type !== "add"}
           onChange={(value) => {
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
               eventCover: value,
-            }));
+            } : undefined);
           }}
         />
       </FormControl>
@@ -75,10 +76,10 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
           disabled={type !== "edit" && type !== "add"}
           required
           onChange={(event) => {
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
               eventTitle: event.target.value,
-            }));
+            } : undefined);
           }}
         />
       </FormControl>
@@ -90,10 +91,10 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
           disabled={type !== "edit" && type !== "add"}
           required
           onChange={(event) => {
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
               eventDesc: event.target.value,
-            }));
+            } : undefined);
           }}
         />
       </FormControl>
@@ -107,26 +108,26 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
           required
           disabled={type !== "edit" && type !== "add"}
           onChange={(event, value) => {
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
-              eventCapacity: value,
-            }));
+              eventCapacity: value ? value : 0,
+            } : undefined);
           }}
         />
       </FormControl>
       <FormControl sx={{ width: 1 / 2, mb: 2, mr: 2 }} variant="standard">
         <DateTimeRangePicker
           label="Duration"
-          defaultStartVal={event.eventStartDt}
-          defaultEndVal={event.eventEndDt}
+          defaultStartVal={event.eventStartDt ? dayjs(event.eventStartDt).toISOString() : ""}
+          defaultEndVal={event.eventEndDt ? dayjs(event.eventEndDt).toString() : ""}
           disabled={type !== "edit" && type !== "add"}
           onChange={(values) => {
             if (values.length !== 2) return;
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
-              eventStartDt: values?.[0]?.format(),
-              eventEndDt: values?.[1]?.format(),
-            }));
+              eventStartDt: values?.[0]?.format() ? new Date(values?.[0]?.format()) : dayjs().toDate(), 
+              eventEndDt: values?.[1]?.format() ? new Date(values?.[1]?.format()) : dayjs().toDate(),
+            } : undefined);
           }}
         />
       </FormControl>
@@ -136,10 +137,10 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
           value={value.eventPlace}
           disabled={type !== "edit" && type !== "add"}
           onChange={(event, value) => {
-            setEvent((prev) => ({
+            setEvent(prev => prev ? {
               ...prev,
               eventPlace: value,
-            }));
+            } : undefined);
           }}
         />
       </FormControl>
@@ -151,7 +152,7 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
             eventId={value.eventId}
             items={userList}
             onDelete={onDelete}
-            isDeleting={isDeleting}
+            isDeleting={isDeleting ? isDeleting : false}
           />
         </FormControl>
       ) : null}
@@ -176,7 +177,9 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
               loadingPosition="end"
               loading={isUpdating}
               onClick={() => {
-                onSubmit(event);
+                if (onSubmit && event) {
+                  onSubmit(event);
+                }
               }}
             >
               Submit

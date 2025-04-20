@@ -23,7 +23,7 @@ export const userApi = createApi({
 				method: "GET",
 			}),
 		}),
-		getUserListByIds: builder.mutation<SgehUser, Array<string>>({
+		getUserListByIds: builder.mutation<SgehUser[], Array<string>>({
 			query: (userIds) => ({
 				url: `api/user-manager/user/getUserDetails`,
 				method: "POST",

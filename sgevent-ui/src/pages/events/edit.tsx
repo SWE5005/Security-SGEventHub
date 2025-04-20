@@ -57,7 +57,7 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
   }, [data]);
 
   useEffect(() => {
-    setUserList(userListResult.data);
+    setUserList(userListResult.data ?? []);
   }, [userListResult]);
 
   const onUpdateUser = (event: SgehEvent) => {
@@ -84,7 +84,7 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
           userList={userList}
           onSubmit={onUpdateUser}
           onDelete={registerEvent}
-          isDeleting={registerResult.isFetching}
+          isDeleting={registerResult.isLoading}
           isUpdating={result.isLoading}
           isError={result.isError}
         />
