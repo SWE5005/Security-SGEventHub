@@ -9,7 +9,7 @@ export interface EventListProps {
 }
 
 const EventList: React.FC<EventListProps> = ({ isAdmin }) => {
-  const { data, isFetching, refetch } = useGetEventListQuery(null, {
+  const { data, isFetching, refetch } = useGetEventListQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
   const [deleteEvent, deleteResult] = useDeleteEventMutation();

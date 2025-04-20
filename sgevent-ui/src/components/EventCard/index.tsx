@@ -16,12 +16,13 @@ import { useSelector } from "react-redux";
 
 export interface EventCardProps {
   value: any;
-  onEdit: () => void;
-  onDelete: () => void;
-  onRegister: () => void;
-  onDetails: () => void;
+  onEdit: (eventId: string) => void;
+  onDelete: (eventId: string) => void;
+  onRegister: (params: { type: string; eventId: string; userId: string }) => void;
+  onDetails: (eventId: string) => void;
   isAdmin: boolean;
   isRegistering: boolean;
+  isDeleting?: boolean;
 }
 
 const EventCard: React.FC<EventCardProps> = ({
@@ -32,6 +33,7 @@ const EventCard: React.FC<EventCardProps> = ({
   onDetails,
   isAdmin,
   isRegistering,
+  isDeleting,
 }) => {
   const { userInfo } = useSelector((state) => selectAuthSlice(state));
   return (

@@ -5,9 +5,9 @@ import Stack from "@mui/material/Stack";
 export interface ChipListProps {
   eventId: string;
   items: { userId: string; userName: string }[];
-  onDelete: (data: { type: string; eventId: string; userId: string }) => void;
-  disabled: boolean;
-  isDeleting: boolean;
+  onDelete?: (data: { type: string; eventId: string; userId: string }) => void;
+  disabled?: boolean;
+  isDeleting?: boolean;
 }
 
 export interface Item {
@@ -17,7 +17,7 @@ export interface Item {
 
 const ChipList: React.FC<ChipListProps> = ({ eventId, items, onDelete, disabled, isDeleting }) => {
   const handleDelete = (item: Item) => () => {
-    onDelete({
+    onDelete && onDelete({
       type: "unregister",
       eventId,
       userId: item.userId,
