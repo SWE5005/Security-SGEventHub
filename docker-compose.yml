@@ -158,8 +158,8 @@ services:
           - spring.http.encoding.force=true
           - jwt.rsa-private-key=classpath:certs/privateKey.pem
           - JWT.rsa-public-key=classpath:certs/publicKey.pem
-          - spring.security.oauth2.client.registration.google.client-id=1056702237429-8h2jmgqc6na540gvcb7v659oo2e0jvvk.apps.googleusercontent.com
-          - spring.security.oauth2.client.registration.google.client-secret=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
+          - spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+          - spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
           - frontend.url=http://localhost:80
           - server.port=8080
         expose:
