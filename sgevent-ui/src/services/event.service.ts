@@ -4,10 +4,6 @@ import { RootState } from "../state/store";
 
 export const eventReducerName = "eventApi";
 
-interface SgehAllEventsResult {
-	data: SgehEventResult[];
-}
-
 interface SgehEventResult extends SgehEvent {
 	registrationCount: number;
 	isRegistered: boolean;
@@ -25,7 +21,7 @@ export const eventApi = createApi({
 	}),
 	refetchOnMountOrArgChange: true,
 	endpoints: (builder) => ({
-		getEventList: builder.query<SgehAllEventsResult, void>({
+		getEventList: builder.query<SgehEventResult[], void>({
 			query: () => ({
 				url: "api/event-manager/event/all",
 				method: "GET",
@@ -61,19 +57,6 @@ export const eventApi = createApi({
 			query: ({ type, eventId, userId }) => ({
 				url: `api/event-manager/event/registration/${type}/${eventId}/${userId}`,
 				method: "GET",
-			}),
-		}),
-		getEventReviews: builder.query<SgehEventReview, string>({
-			query: (eventId) => ({
-				url: `api/event-manager/review/event/${eventId}`,
-				method: "GET",
-			}),
-		}),
-		postEventReview: builder.mutation<SgehEventReview, SgehEventReviewReq>({
-			query: ({ eventId, userId, rating, comment }) => ({
-				url: "api/event-manager/review/add",
-				method: "POST",
-				body: { eventId, userId, rating, comment },
 			}),
 		}),
 	}),

@@ -1,13 +1,15 @@
 import React, { useEffect } from "react";
-import { eventApi } from "../../services/event.service";
+import { useGetEventListQuery, useDeleteEventMutation, useRegisterEventMutation } from "../../services/event.service";
 import EventCard from "../EventCard";
 import Box from "@mui/material/Box";
 import { navigate } from "gatsby";
 
-const { useGetEventListQuery, useDeleteEventMutation, useRegisterEventMutation } = eventApi;
+export interface EventListProps {
+  isAdmin: boolean;
+}
 
-const EventList = ({ isAdmin }) => {
-  const { data, error, isFetching, refetch } = useGetEventListQuery(null, {
+const EventList: React.FC<EventListProps> = ({ isAdmin }) => {
+  const { data, isFetching, refetch } = useGetEventListQuery(null, {
     refetchOnMountOrArgChange: true,
   });
   const [deleteEvent, deleteResult] = useDeleteEventMutation();
@@ -18,13 +20,13 @@ const EventList = ({ isAdmin }) => {
   }, [registerResult, deleteResult]);
 
   //正确
-  const onEdit = (eventId) => {
+  const onEdit = (eventId: string ) => {
     navigate(`/events/edit?eventid=${eventId}`);
   };
 
 
   //正确
-  const onDetails = (eventId) => {
+  const onDetails = (eventId: string) => {
     navigate(`/events/details?eventid=${eventId}`);
   };
 

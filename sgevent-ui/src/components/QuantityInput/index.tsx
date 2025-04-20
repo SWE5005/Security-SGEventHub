@@ -1,12 +1,18 @@
 import * as React from "react";
-import { Unstable_NumberInput as BaseNumberInput } from "@mui/base/Unstable_NumberInput";
+import { Unstable_NumberInput as BaseNumberInput, NumberInputProps } from "@mui/base/Unstable_NumberInput";
 import { styled } from "@mui/system";
 import RemoveIcon from "@mui/icons-material/Remove";
 import FormLabel from "@mui/material/FormLabel";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 
-const NumberInput = React.forwardRef(function CustomNumberInput(props, ref) {
+export interface QuantityInputProps extends Omit<NumberInputProps, 'slots' | 'slotProps'> {
+  label: string;
+  min: number;
+  max: number;
+}
+
+const NumberInput: React.FC<QuantityInputProps> = React.forwardRef(function CustomNumberInput(props, ref) {
   return (
     <Box
       sx={{

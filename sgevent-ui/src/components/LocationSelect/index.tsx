@@ -25,7 +25,7 @@ const LocationSelect: React.FC<LocationSelectProps> = ({ label, value, onChange,
   }, [result.data]);
 
   const onInputChange = React.useCallback(
-    (e, input) => {
+    (e: React.SyntheticEvent, input: string) => {
       if (!input || input === value) return;
 
       searchLocation(input);

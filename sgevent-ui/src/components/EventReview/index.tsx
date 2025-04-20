@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { eventApi } from '../../services/event.service';
+import { useGetEventReviewsQuery, usePostEventReviewMutation } from '../../services/review.service';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Rating from '@mui/material/Rating';
-import { useTheme } from '@mui/material/styles'; // 导入 useTheme 钩子
+import { useTheme } from '@mui/material/styles';
 
-const { useGetEventReviewsQuery, usePostEventReviewMutation } = eventApi
+interface EventReviewProps {
+  eventId: string;
+  userId: string;
+}
 
-const EventReview: React.FC<{ eventId: string; userId: string }> = ({ eventId, userId }) => {
-  const theme = useTheme(); // 使用 theme 钩子获取当前主题
-  const { data: reviews = [], isLoading, refetch } = useGetEventReviewsQuery(eventId);
-  const [postReview, { isSuccess, isError, reset }] = usePostEventReviewMutation();
+const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
+  const theme = useTheme();
+  const { data: reviews, isLoading, refetch } = useGetEventReviewsQuery(eventId);
+  const [postReview ] = usePostEventReviewMutation();
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -21,23 +24,23 @@ const EventReview: React.FC<{ eventId: string; userId: string }> = ({ eventId, u
 
   useEffect(() => {
     // Check if the current user has submitted a comment
-    const hasReviewed = reviews.some(review => review.userId === userId);
+    const hasReviewed = reviews?.some(review => review.userId === userId) ?? false;
     setUserHasReviewed(hasReviewed);
   }, [reviews, userId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // 阻止表单的默认提交行为
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const result = await postReview({ eventId, userId, rating, comment }).unwrap();
     if (result) {
-      setRating(0); // 重置评分
-      setComment(''); // 重置评论
-      refetch(); // 重新获取最新的评论列表
+      setRating(0);
+      setComment('');
+      refetch();
       setSubmitStatus('Review submitted successfully.');
-      setTimeout(() => setSubmitStatus(''), 5000); // 5秒后清除状态消息
+      setTimeout(() => setSubmitStatus(''), 5000);
       setUserHasReviewed(true);
     } else {
       setSubmitStatus('Failed to submit review.');
-      setTimeout(() => setSubmitStatus(''), 5000); // 5秒后清除状态消息
+      setTimeout(() => setSubmitStatus(''), 5000);
     }
   };
 
@@ -47,13 +50,17 @@ const EventReview: React.FC<{ eventId: string; userId: string }> = ({ eventId, u
       <br /><br />
       {isLoading ? (
         <p>Loading reviews...</p>
+      ) : reviews && reviews.length > 0 ? (
+        <Box>
+          {reviews.map((review, index) => (
+            <Box key={index} sx={{ mb: 2 }}>
+              <Typography>{review.comment}</Typography>
+              <Rating name={`review-${index}`} value={review.rating} readOnly />
+            </Box>
+          ))}
+        </Box>
       ) : (
-        reviews.map(review => (
-          <Box key={review.reviewId}>
-            <Typography>{review.comment}</Typography>
-            <Rating name="read-only" value={review.rating} readOnly />
-          </Box>
-        ))
+        <Typography>No reviews yet</Typography>
       )}
       <br /><br /><br />
       {!userHasReviewed && (
@@ -63,7 +70,7 @@ const EventReview: React.FC<{ eventId: string; userId: string }> = ({ eventId, u
             name="simple-controlled"
             value={rating}
             onChange={(event, newValue) => {
-              setRating(newValue);
+              setRating(newValue ?? 0);
             }}
             precision={0.5}
             max={5}

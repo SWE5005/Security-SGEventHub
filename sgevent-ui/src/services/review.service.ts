@@ -12,21 +12,21 @@ export const reviewApi = createApi({
 	}),
 	refetchOnMountOrArgChange: true,
 	endpoints: (builder) => ({
-		getEventReviews: builder.query<SgehEventReviewReq, string>({
-			query: (eventId) => ({
-				url: `api/event-manager/review/event/${eventId}`,
-				method: "GET",
-			}),
-		}),
-		postEventReview: builder.mutation<void, SgehEventReview>({
+		postEventReview: builder.mutation<SgehEventReview, SgehEventReviewReq>({
 			query: ({ eventId, userId, rating, comment }) => ({
 				url: "api/event-manager/review/add",
 				method: "POST",
 				body: { eventId, userId, rating, comment },
 			}),
 		}),
+		getEventReviews: builder.query<SgehEventReview[], string>({
+			query: (eventId) => ({
+				url: `api/event-manager/review/event/${eventId}`,
+				method: "GET",
+			}),
+		}),
 	}),
 });
 
 export const selectReview = (state: RootState) => state[reviewReducerName];
-export const { useGetEventReviewsQuery, usePostEventReviewMutation } = reviewApi;
+export const { usePostEventReviewMutation, useGetEventReviewsQuery } = reviewApi;

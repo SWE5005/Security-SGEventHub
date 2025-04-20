@@ -3,6 +3,7 @@ import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { toBase64 } from "../../utils";
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -15,14 +16,22 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function InputFileUpload({ label, value, onChange, disabled }) {
+export interface FileUploaderProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}
+
+const InputFileUpload: React.FC<FileUploaderProps> = ({ label, value, onChange, disabled }) => {
   const [picture, setPicture] = React.useState("");
-  const onUpload = (e) => {
-    // setPicture(URL.createObjectURL(e.target.files[0]));
-    toBase64(e.target.files[0], (value) => {
-      onChange(value);
-    });
-    e.target.value = null;
+  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      toBase64(e.target.files[0], (value: string) => {
+        onChange(value);
+      });
+      e.target.value = '';
+    }
   };
   React.useEffect(() => {
     setPicture(value);
@@ -49,3 +58,5 @@ export default function InputFileUpload({ label, value, onChange, disabled }) {
     </>
   );
 }
+
+export default InputFileUpload;

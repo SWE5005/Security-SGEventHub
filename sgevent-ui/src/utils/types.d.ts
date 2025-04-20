@@ -57,13 +57,9 @@ interface LoginResponse {
 }
 
 interface EventUserRequest {
-	userId?: string;
 	userName: string;
 	password: string;
 	emailAddress: string;
-	activeStatus: number;
-	roleId: number;
-	createDt?: string;
 }
 
 interface EventUserResponse {
