@@ -1,0 +1,7 @@
+# Development Overrides
+services:
+  sgeh-auth-manager:
+    profiles:
+      - dev
+    environment:
+      - frontend.url=http://localhost:8000

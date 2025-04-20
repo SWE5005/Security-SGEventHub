@@ -1,9 +1,13 @@
 package edu.nus.microservice.auth_manager.mapper;
 
+import edu.nus.microservice.auth_manager.dto.CreateUserRequest;
 import edu.nus.microservice.auth_manager.dto.UserRegistrationRequest;
 import edu.nus.microservice.auth_manager.dto.UserResponse;
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
+import edu.nus.microservice.auth_manager.enums.UserStatus;
+import edu.nus.microservice.auth_manager.enums.UserRoles;
 import lombok.RequiredArgsConstructor;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +33,7 @@ public class UserInfoMapper {
         return userInfoEntity;
     }
 
+
     public UserResponse convertToUserResponse(UserInfoEntity userInfo){
         return UserResponse.builder()
                 .userId(userInfo.getId())
@@ -39,5 +44,31 @@ public class UserInfoMapper {
                 .createDatetime(userInfo.getCreateDatetime())
                 .build();
 
+    }
+
+    public UserInfoEntity mapUserRequestToUserInfoEntity(CreateUserRequest userRequest){
+        UserInfoEntity userInfoEntity = new UserInfoEntity();
+        userInfoEntity.setId(UUID.randomUUID());
+        userInfoEntity.setUsername(userRequest.getUsername());
+        userInfoEntity.setEmailAddress(userRequest.getEmailAddress());
+        userInfoEntity.setMobileNumber(userRequest.getMobileNumber());
+        userInfoEntity.setRoles(UserRoles.END_USER.name());
+        userInfoEntity.setCreateDatetime(LocalDateTime.now());
+        userInfoEntity.setActiveStatus("ACTIVE");
+        userInfoEntity.setPassword(passwordEncoder.encode("p@ssword123"));
+        return userInfoEntity;
+    }
+
+    public UserInfoEntity mapGoogleUserToUserInfoEntity(String email, String name ){
+        UserInfoEntity userInfoEntity = new UserInfoEntity();
+        userInfoEntity.setId(UUID.randomUUID());
+        userInfoEntity.setUsername(name);
+        userInfoEntity.setEmailAddress(email);
+        userInfoEntity.setMobileNumber("00000000");
+        userInfoEntity.setRoles(UserRoles.END_USER.name());
+        userInfoEntity.setCreateDatetime(LocalDateTime.now());
+        userInfoEntity.setActiveStatus(UserStatus.ACTIVE.name());
+        userInfoEntity.setPassword(passwordEncoder.encode("p@ssword123"));
+        return userInfoEntity;
     }
 }

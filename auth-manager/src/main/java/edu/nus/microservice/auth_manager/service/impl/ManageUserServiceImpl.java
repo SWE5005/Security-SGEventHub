@@ -1,5 +1,6 @@
 package edu.nus.microservice.auth_manager.service.impl;
 
+import edu.nus.microservice.auth_manager.dto.CreateUserRequest;
 import edu.nus.microservice.auth_manager.dto.ManageUserRequest;
 import edu.nus.microservice.auth_manager.dto.UserResponse;
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
@@ -30,6 +31,19 @@ public class ManageUserServiceImpl implements ManageUserService {
         return userList.stream().map(userInfoMapper::convertToUserResponse).toList();
     }
 
+
+    public UserResponse createUser(CreateUserRequest userRequest){
+        try {
+            UserInfoEntity userEntity = userInfoMapper.mapUserRequestToUserInfoEntity(userRequest);
+
+            UserInfoEntity user =  userRepository.save(userEntity);
+            return userInfoMapper.convertToUserResponse(user);
+        } catch (Exception e) {
+            log.error("[UserService:createUser]Failed to create user: ", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     public UserResponse getUserDetails(String userId){
         try {
             UUID id = UUID.fromString(userId);
@@ -42,6 +56,25 @@ public class ManageUserServiceImpl implements ManageUserService {
             throw new RuntimeException(e);
         }
     }
+
+    public Optional<UserInfoEntity> findByEmail(String emailAddress){
+        try {
+            return userRepository.findByEmailAddress(emailAddress);
+        } catch (Exception e) {
+            log.error("[UserService:findByEmail]Failed to find user: ", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveUser(UserInfoEntity userInfo){
+        try {
+             userRepository.save(userInfo);
+        } catch (Exception e) {
+            log.error("[UserService:saveUser]Failed to save user: ", e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public String updateUser(ManageUserRequest userRequest){
         try {

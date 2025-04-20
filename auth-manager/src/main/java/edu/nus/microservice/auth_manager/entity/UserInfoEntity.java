@@ -2,19 +2,19 @@ package edu.nus.microservice.auth_manager.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-
 @Entity
 @Table(name = "users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class UserInfoEntity {
 	@Id
 	@GeneratedValue(strategy= GenerationType.UUID)
@@ -30,7 +30,7 @@ public class UserInfoEntity {
 	private String password;
 
 	@NotNull
-	@Column(name = "emailAddress", nullable = false)
+	@Column(name = "emailAddress", nullable = false, unique = true)
 	private String emailAddress;
 
 	@NotNull
