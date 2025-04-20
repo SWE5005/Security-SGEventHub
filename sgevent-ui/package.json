@@ -1,8 +1,8 @@
 {
-  "name": "community-event",
+  "name": "sg-event-hub",
   "version": "1.0.0",
   "private": true,
-  "description": "community-event",
+  "description": "Singapore Event Hub platform.",
   "author": "Kaidi Zhang",
   "keywords": [
     "gatsby"
@@ -13,6 +13,7 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
+    "typecheck": "tsc --noEmit",
     "deploy": "npm run -n \"-r dotenv/config\" && npm run build && gatsby-plugin-s3 deploy"
   },
   "dependencies": {
@@ -25,14 +26,22 @@
     "@mui/x-date-pickers": "^7.1.0",
     "@mui/x-date-pickers-pro": "^7.1.0",
     "@reduxjs/toolkit": "^2.1.0",
+    "@types/js-cookie": "^3.0.6",
+    "cookie-parser": "^1.4.7",
     "dayjs": "^1.11.10",
     "gatsby": "^5.13.2",
     "gatsby-plugin-s3": "^0.4.1",
     "gatsby-plugin-sitemap": "^6.13.1",
     "http-proxy-middleware": "^2.0.6",
+    "js-cookie": "^3.0.5",
+    "jwt-decode": "^4.0.0",
+    "openid-client": "^6.3.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.1.0",
     "redux-persist": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8"
   }
 }

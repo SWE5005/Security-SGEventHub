@@ -5,3 +5,4 @@ public
 launch.json
 .env
 !.env.template
+.scannerwork

@@ -1,66 +1,40 @@
 name: sg-event-hub
 
 services:
-    keycloak-db:
-        image: postgres:17.0
-        environment:
-            - POSTGRES_DB=keycloak
-            - POSTGRES_USER=${DEV_USER}
-            - POSTGRES_PASSWORD=${DEV_PASSWORD}
-        expose:
-            - 5432
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: on-failure
-                delay: 3s
-        volumes:
-            - keycloak-db-volume:/var/lib/postgresql/data
-    keycloak:
-        # labels:
-        #     - traefik.enable=true
-        #     - traefik.http.routers.keycloak.rule=Host(`keycloak.${DEV_DOMAIN}`)
-        #     - traefik.http.routers.keycloak.middlewares=permissive-headers
-        #     - traefik.http.services.keycloak.loadBalancer.server.port=8080
-        image: keycloak/keycloak:26.1
-        command: -v start --import-realm
-        environment:
-            - KC_BOOTSTRAP_ADMIN_USERNAME=${DEV_USER}
-            - KC_BOOTSTRAP_ADMIN_PASSWORD=${DEV_PASSWORD}
-            - KC_DB=postgres
-            - KC_DB_URL_DATABASE=keycloak
-            - KC_DB_USERNAME=${DEV_USER}
-            - KC_DB_PASSWORD=${DEV_PASSWORD}
-            - KC_DB_URL_HOST=keycloak-db # use internal address / docker network alias
-            - KC_DB_URL_PORT=5432
-            - KC_HTTP_ENABLED=true
-            - KC_HOSTNAME=http://localhost:8080
-            - KC_HOSTNAME_BACKCHANNEL_DYNAMIC=true
-            - KC_HTTP_PORT=8080
-            - KC_HEALTH_ENABLED=true
-            - KC_PROXY_HEADERS=xforwarded
-            - DEFAULT_REALM=sgeh
-            - DEV_USER=${DEV_USER}
-            - DEV_PASSWORD=${DEV_PASSWORD}
-        healthcheck:
-            test: "exec 3<>/dev/tcp/localhost/9000; echo -e 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3;cat <&3 | grep -q '\"status\": \"UP\"' && exit 0 || exit 1"
-            interval: 10s
-            timeout: 5s
-            retries: 30 # keycloak might take a long time to initialize
-        volumes:
-            - ./keycloak:/opt/keycloak/data/import
-        expose:
-            - 8080
+    traefik:
+        image: traefik:v3.2
+        privileged: true
+        labels:
+            - traefik.enable=true
+            - traefik.http.middlewares.cors.headers.accessControlAllowMethods=*
+            - traefik.http.middlewares.cors.headers.accessControlAllowHeaders=*
+            - traefik.http.middlewares.cors.headers.accessControlAllowOriginList=*
+            - traefik.http.middlewares.cors.headers.accessControlMaxage=100
+            - traefik.http.middlewares.cors.headers.accessControlAllowCredentials=true
+            - traefik.http.middlewares.cors.headers.addVaryHeader=true
+            - traefik.http.routers.api.rule=Host(`traefik.127.0.0.1.nip.io`)
+            - traefik.http.routers.api.service=api@internal
+        command:
+            - --api.insecure=true
+            - --providers.docker
+            - --providers.docker.exposedByDefault=false
+            - --entrypoints.web.address=:80
+            - --entrypoints.web.forwardedHeaders.insecure=true
+            - --entrypoints.user.address=:8081
+            - --entrypoints.user.forwardedHeaders.insecure=true
+            - --entrypoints.event.address=:8082
+            - --entrypoints.event.forwardedHeaders.insecure=true
+            - --entrypoints.auth.address=:8083
+            - --entrypoints.auth.forwardedHeaders.insecure=true
         ports:
-            - 8080:8080
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: on-failure
-                delay: 3s
-        depends_on:
-            keycloak-db:
-                condition: service_started
+            - 80:80
+            - 8081:8081
+            - 8082:8082
+            - 8083:8083
+        volumes:
+            - /run/podman/podman.sock:/var/run/docker.sock
+            # - /var/run/docker.sock:/var/run/docker.sock
+
     sgeh-db:
         image: postgres:17
         ports:
@@ -69,56 +43,158 @@ services:
             POSTGRES_DB: sgeh
             POSTGRES_USER: ${DEV_USER}
             POSTGRES_PASSWORD: ${DEV_PASSWORD}
-        deploy:
-            replicas: 1
         volumes:
             - sgeh-db-volume:/var/lib/postgresql/data
-    sgeh-user-manager:
-        image: user-manager:2.0
-        build:
-            context: ./user-manager
-            dockerfile: Dockerfile
-            args:
-                - APP_VERSION=${APP_VERSION}
-                - REVISION=${REVISION}
-        hostname: user-manager
-        container_name: user-manager
-        ports:
-            - "8081:8080"
-        deploy:
-            replicas: 1
-    sgeh-event-manager:
-        image: event-manager:2.0
-        build:
-            context: ./event-manager
-            dockerfile: Dockerfile
-            args:
-                - APP_VERSION=${APP_VERSION}
-                - REVISION=${REVISION}
-        hostname: event-manager
-        container_name: event-manager
-        ports:
-            - "8082:8080"
-        deploy:
-            replicas: 1
+
     sgeh-web:
+        labels:
+          - traefik.enable=true
+          - traefik.http.routers.web.entrypoints=web
+          - traefik.http.routers.web.rule=PathPrefix(`/`)
+          - traefik.http.routers.web.middlewares=cors
+          - traefik.http.services.web.loadbalancer.server.port=8080
         image: sgeh-web:2.0
         build:
-            context: ./sgevent-ui
-            dockerfile: Dockerfile
-            args:
-                - APP_VERSION=${APP_VERSION}
-                - REVISION=${REVISION}
+          context: ./sgevent-ui
+          dockerfile: Dockerfile
+          args:
+            - APP_VERSION=${APP_VERSION}
+            - REVISION=${REVISION}
         hostname: sgeh-web
         container_name: sgeh-web
         environment:
-            - GATSBY_USER_MANAGER_API_URL=http://sgeh-user-manager:8080/
-            - GATSBY_EVENT_MANAGER_API_URL=http://sgeh-event-manager:8080/
-            - GATSBY_ONE_MAP_API_URL=https://www.onemap.gov.sg/api/common/elastic
+          - GATSBY_AUTH_MANAGER_API_URL=http://sgeh-auth-manager:8080/
+          - GATSBY_USER_MANAGER_API_URL=http://sgeh-user-manager:8080/
+          - GATSBY_EVENT_MANAGER_API_URL=http://sgeh-event-manager:8080/
+          - GATSBY_ONE_MAP_API_URL=https://www.onemap.gov.sg/api/common/elastic/
+        expose:
+          - 8080
+
+    sgeh-user-manager:
+        labels:
+          - traefik.enable=true
+          - traefik.http.routers.user.entrypoints=user
+          - traefik.http.routers.user.rule=PathPrefix(`/`)
+          - traefik.http.routers.user.middlewares=cors
+          - traefik.http.services.user.loadbalancer.server.port=8080
+        image: user-manager:2.0
+        build:
+          context: ./user-manager
+          dockerfile: Dockerfile
+          args:
+            - APP_VERSION=${APP_VERSION}
+            - REVISION=${REVISION}
+        hostname: user-manager
+        container_name: user-manager
+        environment:
+          - spring.application.name=user-manager
+          - spring.jpa.hibernate.ddl-auto=update
+          - spring.jpa.show-sql=true
+          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+          - spring.datasource.username=${DEV_USER}
+          - spring.datasource.password=${DEV_PASSWORD}
+          - spring.http.encoding.charset=UTF-8
+          - spring.http.encoding.enabled=true
+          - spring.http.encoding.force=true
+          - server.port=8080
+        expose:
+          - 8080
+
+    sgeh-event-manager:
+        labels:
+          - traefik.enable=true
+          - traefik.http.routers.event.entrypoints=event
+          - traefik.http.routers.event.rule=PathPrefix(`/`)
+          - traefik.http.routers.event.middlewares=cors
+          - traefik.http.services.event.loadbalancer.server.port=8080
+        image: event-manager:2.0
+        build:
+          context: ./event-manager
+          dockerfile: Dockerfile
+          args:
+            - APP_VERSION=${APP_VERSION}
+            - REVISION=${REVISION}
+        hostname: event-manager
+        container_name: event-manager
+        environment:
+          - spring.application.name=event-manager
+          - spring.jpa.hibernate.ddl-auto=update
+          - spring.jpa.show-sql=true
+          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+          - spring.datasource.username=${DEV_USER}
+          - spring.datasource.password=${DEV_PASSWORD}
+          - spring.http.encoding.charset=UTF-8
+          - spring.http.encoding.enabled=true
+          - spring.http.encoding.force=true
+          - server.port=8080
+        expose:
+          - 8080
+
+    sgeh-auth-manager:
+        labels:
+          - traefik.enable=true
+          - traefik.http.routers.auth.entrypoints=auth
+          - traefik.http.routers.auth.rule=PathPrefix(`/`)
+          - traefik.http.routers.auth.middlewares=cors
+          - traefik.http.services.auth.loadbalancer.server.port=8080
+        image: auth-manager:1.0
+        build:
+          context: ./auth-manager
+          dockerfile: Dockerfile
+          args:
+            - APP_VERSION=${APP_VERSION}
+            - REVISION=${REVISION}
+        hostname: auth-manager
+        container_name: auth-manager
+        environment:
+          - spring.application.name=auth-manager
+          - spring.jpa.hibernate.ddl-auto=update
+          - spring.jpa.show-sql=true
+          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+          - spring.datasource.username=${DEV_USER}
+          - spring.datasource.password=${DEV_PASSWORD}
+          - spring.http.encoding.charset=UTF-8
+          - spring.http.encoding.enabled=true
+          - spring.http.encoding.force=true
+          - jwt.rsa-private-key=classpath:certs/privateKey.pem
+          - JWT.rsa-public-key=classpath:certs/publicKey.pem
+          - spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
+          - spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
+          - frontend.url=http://localhost:80
+          - server.port=8080
+        expose:
+          - 8080
+
+    sgeh-sonar-db:
+        image: postgres:17
+        environment:
+            POSTGRES_DB: sonar
+            POSTGRES_USER: ${DEV_USER}
+            POSTGRES_PASSWORD: ${DEV_PASSWORD}
+        volumes:
+            - sonar-db-volume:/var/lib/postgresql/data
+
+    sonarqube:
+        image: sonarqube:community
+        hostname: sonarqube
+        container_name: sonarqube
+        read_only: true
+        environment:
+            SONAR_JDBC_URL: jdbc:postgresql://sgeh-sonar-db:5432/sonar
+            SONAR_JDBC_USERNAME: ${DEV_USER}
+            SONAR_JDBC_PASSWORD: ${DEV_PASSWORD}
+        volumes:
+            - sonarqube_data:/opt/sonarqube/data
+            - sonarqube_extensions:/opt/sonarqube/extensions
+            - sonarqube_logs:/opt/sonarqube/logs
+            - sonarqube_temp:/opt/sonarqube/temp
         ports:
-            - "8000:8000"
-        deploy:
-            replicas: 1
+            - "9000:9000"
+
 volumes:
     sgeh-db-volume:
-    keycloak-db-volume:
+    sonar-db-volume:
+    sonarqube_data:
+    sonarqube_extensions:
+    sonarqube_logs:
+    sonarqube_temp:
