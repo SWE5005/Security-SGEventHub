@@ -14,7 +14,7 @@ interface LocationSelectProps {
 
 const LocationSelect: React.FC<LocationSelectProps> = ({ label, value, onChange, disabled }) => {
   const [open, setOpen] = React.useState(false);
-  const [options, setOptions] = React.useState([]);
+  const [options, setOptions] = React.useState<string[]>([]);
   const [searchLocation, result] = useSearchLocationMutation();
 
   React.useEffect(() => {
@@ -49,7 +49,9 @@ const LocationSelect: React.FC<LocationSelectProps> = ({ label, value, onChange,
       isOptionEqualToValue={(option, value) => option === value}
       getOptionLabel={(option) => option}
       options={options}
-      onChange={onChange}
+      onChange={(event, newValue) => {
+        onChange(event, newValue || '');
+      }}
       loading={result.isLoading}
       renderInput={(params) => (
         <TextField

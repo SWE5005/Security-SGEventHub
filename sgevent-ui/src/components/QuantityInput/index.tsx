@@ -6,13 +6,13 @@ import FormLabel from "@mui/material/FormLabel";
 import Box from "@mui/material/Box";
 import AddIcon from "@mui/icons-material/Add";
 
-export interface QuantityInputProps extends Omit<NumberInputProps, 'slots' | 'slotProps'> {
+export interface QuantityInputProps {
   label: string;
   min: number;
   max: number;
 }
 
-const NumberInput: React.FC<QuantityInputProps> = React.forwardRef(function CustomNumberInput(props, ref) {
+const QuantityInput = React.forwardRef<HTMLInputElement, QuantityInputProps>(function CustomNumberInput(props, ref) {
   return (
     <Box
       sx={{
@@ -45,11 +45,7 @@ const NumberInput: React.FC<QuantityInputProps> = React.forwardRef(function Cust
   );
 });
 
-export default NumberInput;
-
-// export default function QuantityInput() {
-//   return <NumberInput aria-label="Quantity Input" min={1} max={99} />;
-// }
+export default QuantityInput;
 
 const blue = {
   100: "#daecff",

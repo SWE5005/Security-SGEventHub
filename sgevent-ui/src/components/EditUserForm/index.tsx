@@ -20,7 +20,7 @@ export interface EditUserFormProps {
 }
 
 const EditUserForm: React.FC<EditUserFormProps> = ({ value, roleList, onSubmit, isUpdating, isError, isEdit }) => {
-	const [user, setUser] = React.useState<any>();
+	const [user, setUser] = React.useState<SgehUser | undefined>();
 
 	React.useEffect(() => {
 		setUser(value);
@@ -41,10 +41,10 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ value, roleList, onSubmit, 
 					disabled={isEdit}
 					value={user.emailAddress}
 					onChange={(event) => {
-						setUser((prev) => ({
+						setUser(prev => prev ? {
 							...prev,
 							emailAddress: event.target.value,
-						}));
+						} : undefined);
 					}}
 				/>
 			</FormControl>
@@ -55,10 +55,10 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ value, roleList, onSubmit, 
 					label="Name"
 					value={user.userName}
 					onChange={(event) => {
-						setUser((prev) => ({
+						setUser(prev => prev ? {
 							...prev,
 							userName: event.target.value,
-						}));
+						} : undefined);
 					}}
 				/>
 			</FormControl>
@@ -71,10 +71,10 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ value, roleList, onSubmit, 
 					value={user.activeStatus}
 					helperText="Please select account status"
 					onChange={(event) => {
-						setUser((prev) => ({
+						setUser(prev => prev ? {
 							...prev,
-							activeStatus: event.target.value,
-						}));
+							activeStatus: Number(event.target.value),
+						} : undefined);
 					}}
 				>
 					{STATUS_OPTIONS.map((option) => (
@@ -93,7 +93,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ value, roleList, onSubmit, 
 					value={user.roleId}
 					helperText="Please select role"
 					onChange={(event) => {
-						setUser((prev) => ({ ...prev, roleId: event.target.value }));
+						setUser({ ...user!, roleId: Number(event.target.value) });
 					}}
 				>
 					{roleList?.map((option) => (
