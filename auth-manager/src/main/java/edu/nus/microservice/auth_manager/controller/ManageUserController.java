@@ -23,7 +23,7 @@ public class ManageUserController {
 
     private final ManageUserService manageUserService;
 
-//    @PreAuthorize("hasAuthority('SCOPE_USER')")
+    @PreAuthorize("hasAuthority('SCOPE_USER')")
     @GetMapping (path="/all")
     public ResponseEntity<?> getAllEventUsers(Principal principal) {
         log.info("[UserController:getAllUsers]Request to get userlist started for user: ",principal.getName());
@@ -51,7 +51,7 @@ public class ManageUserController {
         }
     }
 
-//    @PreAuthorize("hasAuthority('SCOPE_USER')")
+    @PreAuthorize("hasAuthority('SCOPE_USER')")
     @GetMapping (path="/{userId}/details")
     public ResponseEntity<?> getUserDetails(Principal principal, @PathVariable @Valid @NotNull String userId) {
         log.info("[UserController:getUserDetails]Request to get user details started for user: ",principal.getName());
@@ -78,7 +78,7 @@ public class ManageUserController {
         }
     }
 
-//    @PreAuthorize("hasAuthority('SCOPE_USER')")
+    @PreAuthorize("hasAuthority('SCOPE_USER')")
     @PostMapping(path="/update")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> updateUser(Principal principal,@RequestBody ManageUserRequest userRequest) {

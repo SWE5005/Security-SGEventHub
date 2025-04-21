@@ -23,7 +23,7 @@ public class EventController {
     @PreAuthorize("hasAnyAuthority('SCOPE_READ','SCOPE_EVENT')")
     @GetMapping (path="/all")
     public ResponseEntity<?> getAllEvents(Authentication authentication) {
-        log.info("[EventController:getAllEvents]Request to get event list started for user: ",authentication.getName());
+        log.info("[EventController:getAllEvents]Request to get event list started for user: {}",authentication.getName());
         try {
             //get userid from token
             Jwt jwt = (Jwt) authentication.getCredentials();
@@ -41,7 +41,7 @@ public class EventController {
     @PostMapping (path="/create")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> createEvent(Authentication authentication,@RequestBody EventRequest eventRequest) {
-        log.info("[EventController:createEvent]Request to create event started for user: ",authentication.getName());
+        log.info("[EventController:createEvent]Request to create event started for user: {}",authentication.getName());
         try {
             //get userid from token
             Jwt jwt = (Jwt) authentication.getCredentials();
