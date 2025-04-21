@@ -59,6 +59,7 @@ public class CustomAuthSuccessHandler
       );
 
       if (existingUserEntity.isEmpty()) {
+        //create account with email if account does not exist
         UserInfoEntity newUserEntity = userInfoMapper.mapGoogleUserToUserInfoEntity(
           email,
           name
@@ -68,23 +69,25 @@ public class CustomAuthSuccessHandler
       } else {
         userEntity = existingUserEntity.get();
       }
+
       DefaultOAuth2User newUser = new DefaultOAuth2User(
-        List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
-        attributes,
-        "email"
+              List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
+              attributes,
+              "email"
       );
+      //Generate new security Auth Token with user roles
       Authentication securityAuth = new OAuth2AuthenticationToken(
-        newUser,
-        List.of(new SimpleGrantedAuthority(userEntity.getRoles())),
-        oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()
+              newUser,
+              List.of(new SimpleGrantedAuthority("ROLE_" + userEntity.getRoles())),
+              oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()
       );
       SecurityContextHolder.getContext().setAuthentication(securityAuth);
 
       getRedirectStrategy()
-        .sendRedirect(request, response, frontendUrl + "/home");
+              .sendRedirect(request, response, frontendUrl + "/callback");
     } else {
       this.setAlwaysUseDefaultTargetUrl(true);
-      this.setDefaultTargetUrl(frontendUrl + "/home");
+      this.setDefaultTargetUrl(frontendUrl + "/callback");
       super.onAuthenticationSuccess(request, response, authentication);
     }
   }

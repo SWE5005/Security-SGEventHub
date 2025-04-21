@@ -4,6 +4,7 @@ import edu.nus.microservice.auth_manager.dto.UserRegistrationRequest;
 import edu.nus.microservice.auth_manager.service.impl.AuthServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -28,14 +29,19 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response){
+        log.info("[AuthController:signIn]SignIn Process Started for user:{}",authentication.getName());
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication, response));
+    }
 
-        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
+    @PostMapping("/google/sign-in")
+    public ResponseEntity<?> authenticateGoogleUser(Authentication authentication, HttpServletResponse response){
+        log.info("[AuthController:GoogleSignIn]SignIn Process Started for user:{}",authentication.getName());
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication, response));
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationRequest userRegistrationRequest,
                                           BindingResult bindingResult){
-
         log.info("[AuthController:registerUser]Signup Process Started for user:{}",userRegistrationRequest.getUserEmail());
         if (bindingResult.hasErrors()) {
             List<String> errorMessage = bindingResult.getAllErrors().stream()

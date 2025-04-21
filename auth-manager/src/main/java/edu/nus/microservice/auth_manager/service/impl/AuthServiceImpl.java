@@ -59,6 +59,7 @@ public class AuthServiceImpl implements  AuthService {
                     .accessTokenExpiry(5 * 60)
                     .userName(userInfoEntity.getUsername())
                     .emailAddress(userInfoEntity.getEmailAddress())
+                    .userRole(userInfoEntity.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
 
@@ -110,6 +111,7 @@ public class AuthServiceImpl implements  AuthService {
                     .accessTokenExpiry(30 * 60)
                     .userName(savedUserDetails.getUsername())
                     .emailAddress(savedUserDetails.getEmailAddress())
+                    .userRole(savedUserDetails.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
 
@@ -147,6 +149,7 @@ public class AuthServiceImpl implements  AuthService {
                 .accessTokenExpiry(5 * 60)
                 .userName(userInfoEntity.getUsername())
                 .emailAddress(userInfoEntity.getEmailAddress())
+                .userRole(userInfoEntity.getRoles())
                 .tokenType(TokenType.Bearer)
                 .build();
     }

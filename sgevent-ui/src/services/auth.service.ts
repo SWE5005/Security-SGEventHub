@@ -1,33 +1,61 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "../state/store";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { RootState } from '../state/store';
+import { commonHeader } from '../utils';
 
-export const authReducerName = "authApi";
+export const authReducerName = 'authApi';
 
 export const authApi = createApi({
-	reducerPath: authReducerName,
-	baseQuery: fetchBaseQuery({ baseUrl: process.env.GATSBY_USER_MANAGER_API_URL }),
-	endpoints: (builder) => ({
-		login: builder.mutation<LoginResponse, LoginRequest>({
-			query: (credentials) => ({
-				url: "api/user-manager/user/login",
-				method: "POST",
-				body: credentials,
-			}),
-		}),
+  reducerPath: authReducerName,
+  baseQuery: fetchBaseQuery({
+    baseUrl: process.env.GATSBY_BACKEND_API_URL + '/api/auth',
+    credentials: 'include',
+    prepareHeaders: commonHeader,
+  }),
+  endpoints: builder => ({
+    login: builder.mutation<LoginResponse, LoginRequest>({
+      queryFn: async credential => {
+        try {
+          const token = btoa(`${credential.emailAddress}:${credential.password}`);
+          const data = await fetch(process.env.GATSBY_BACKEND_API_URL + `/api/auth/sign-in`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Basic ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (data.ok) {
+            return { data: data.json() };
+          } else {
+            return Promise.reject(data);
+          }
+        } catch (error) {
+          return { error };
+        }
+      },
+    }),
 
-		// 新增：处理注册请求
-		signUp: builder.mutation<EventUserResponse, EventUserRequest>({
-			// Adjust the query to accept user info and pass them in the request body
-			query: (userInfo) => ({
-				url: "api/user-manager/user/signup", // 假设这是你的注册接口
-				method: "POST",
-				body: userInfo,
-			}),
-		}),
-	}),
+    loginWithGoogle: builder.mutation<LoginResponse, void>({
+      query: () => ({
+        url: `/google/sign-in`,
+        method: 'POST',
+      }),
+    }),
+    signUp: builder.mutation<LoginResponse, EventUserRequest>({
+      query: userInfo => ({
+        url: '/sign-up',
+        method: 'POST',
+        body: userInfo,
+      }),
+    }),
+    logout: builder.mutation<string, void>({
+      query: () => ({
+        url: '/logout',
+        method: 'POST',
+      }),
+    }),
+  }),
 });
 
 export const selectAuth = (state: RootState) => state[authReducerName];
 
-// 导出useLoginMutation和useSignUpMutation
-export const { useLoginMutation, useSignUpMutation } = authApi;
+export const { useLoginMutation, useLoginWithGoogleMutation, useSignUpMutation, useLogoutMutation } = authApi;

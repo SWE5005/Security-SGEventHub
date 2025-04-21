@@ -27,9 +27,9 @@ public class CustomAuthProvider implements AuthenticationProvider {
         try{
             UserDetails userDetails = userInfoService.loadUserByUsername(authentication.getName());
             // Validate password
-//            if (!passwordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword())) {
-//                throw new BadCredentialsException("Invalid username or password");
-//            }
+            if (!passwordEncoder.matches(authentication.getCredentials().toString(), userDetails.getPassword())) {
+                throw new BadCredentialsException("Invalid username or password");
+            }
             return new UsernamePasswordAuthenticationToken(userDetails.getUsername(),userDetails.getPassword(),userDetails.getAuthorities());
         }catch (UsernameNotFoundException e){
             throw new BadCredentialsException("Invalid Credentials");
