@@ -53,13 +53,21 @@ interface LoginResponse {
   token_type: string;
   user_name: string;
   email_address: string;
-  user_role: "END_USER" | "EVENT_MANAGER" | "SUPER_ADMIN";
+  user_role: 'END_USER' | 'EVENT_MANAGER' | 'SUPER_ADMIN';
 }
 
 interface EventUserRequest {
   userName: string;
   password: string;
   emailAddress: string;
+}
+
+interface SignupRequest {
+  userName: string;
+  userEmail: string;
+  userMobileNo: string;
+  userPassword: string;
+  userRole: 'END_USER' | 'EVENT_MANAGER' | 'SUPER_ADMIN';
 }
 
 interface EventUserResponse {
@@ -75,4 +83,4 @@ interface SgehEventDetails extends SgehEvent {
   userList: SgehEventRegistration[];
 }
 
-type SgehEventReviewReq = Omit<SgehEventReview, "reviewId">;
+type SgehEventReviewReq = Omit<SgehEventReview, 'reviewId'>;

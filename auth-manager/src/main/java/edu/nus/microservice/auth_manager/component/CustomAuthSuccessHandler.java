@@ -49,6 +49,7 @@ public class CustomAuthSuccessHandler
           oAuth2AuthenticationToken.getAuthorizedClientRegistrationId()
         )
     ) {
+      log.info("[CustomAuthSuccessHandler:onAuthenticationSuccess] Google Authentication Successful:{}", authentication.getName());
       DefaultOAuth2User principal = (DefaultOAuth2User) authentication.getPrincipal();
       Map<String, Object> attributes = principal.getAttributes();
       String email = attributes.getOrDefault("email", "").toString();
@@ -59,6 +60,7 @@ public class CustomAuthSuccessHandler
       );
 
       if (existingUserEntity.isEmpty()) {
+        log.info("[CustomAuthSuccessHandler:onAuthenticationSuccess] Account does not exist, creating new user account for user:{}", authentication.getName());
         //create account with email if account does not exist
         UserInfoEntity newUserEntity = userInfoMapper.mapGoogleUserToUserInfoEntity(
           email,
