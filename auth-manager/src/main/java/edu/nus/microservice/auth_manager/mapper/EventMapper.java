@@ -1,10 +1,13 @@
 package edu.nus.microservice.auth_manager.mapper;
 
+import edu.nus.microservice.auth_manager.dto.EventDetailResponse;
+import edu.nus.microservice.auth_manager.dto.EventDetailUser;
 import edu.nus.microservice.auth_manager.dto.EventListResponse;
 import edu.nus.microservice.auth_manager.dto.EventRequest;
 import edu.nus.microservice.auth_manager.entity.EventEntity;
 import edu.nus.microservice.auth_manager.entity.EventRegistrationEntity;
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
+import edu.nus.microservice.auth_manager.enums.EventStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +21,8 @@ public class EventMapper {
 
     public EventListResponse convertToEventListResponse(EventEntity event, UUID userId){
         List<EventRegistrationEntity> registrationList = event.getRegistration();
+        Boolean isRegistered = registrationList.stream().filter(o->o.user.getId().equals(userId)).findFirst().isPresent();
+
         return EventListResponse.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -29,7 +34,7 @@ public class EventMapper {
                 .capacity(event.getCapacity())
                 .cover(event.getCover())
                 .createDatetime(event.getCreateDatetime())
-                .isRegistered(registrationList.contains(userId))
+                .isRegistered(isRegistered)
                 .registrationCount(registrationList.stream().count())
                 .build();
     }
@@ -46,6 +51,28 @@ public class EventMapper {
                 .capacity(request.getCapacity())
                 .cover(request.getCover())
                 .createDatetime(LocalDateTime.now())
+                .status(EventStatus.ACTIVE.name())
+                .build();
+    }
+
+    public EventDetailResponse convertToEventDetails(EventEntity event, UUID userId){
+        List<EventRegistrationEntity> registrationList = event.getRegistration();
+        List<EventDetailUser> userList = registrationList.stream().map(EventRegistrationMapper::convertToEventDetailUser).toList();
+        Boolean isRegistered = registrationList.stream().filter(o->o.user.getId().equals(userId)).findFirst().isPresent();
+        return EventDetailResponse.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .owner(event.getOwner().getEmailAddress())
+                .description(event.getDescription())
+                .location(event.getLocation())
+                .startDatetime(event.getStartDatetime())
+                .endDatetime(event.getEndDatetime())
+                .capacity(event.getCapacity())
+                .cover(event.getCover())
+                .createDatetime(event.getCreateDatetime())
+                .isRegistered(isRegistered)
+                .registrationCount(registrationList.stream().count())
+                .userList(userList)
                 .build();
     }
 }

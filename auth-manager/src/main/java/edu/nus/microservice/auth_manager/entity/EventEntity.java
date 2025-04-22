@@ -44,7 +44,7 @@ public class EventEntity {
   private int capacity;
 
   @ManyToOne
-  @JoinColumn(name = "owner",referencedColumnName = "id")
+  @JoinColumn(name = "owner_id",referencedColumnName = "id")
   private UserInfoEntity owner;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
