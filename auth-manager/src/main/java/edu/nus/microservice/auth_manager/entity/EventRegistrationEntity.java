@@ -1,10 +1,9 @@
 package edu.nus.microservice.auth_manager.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.*;
 
 @Entity
 @Table(name = "event_registration")
@@ -12,18 +11,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class EventRegistrationEntity {
+
   @Id
-  @GeneratedValue(strategy= GenerationType.UUID)
+  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id")
   private UUID id;
 
-  @Column(name = "user_id")
-  private UUID userId;
+  @ManyToOne
+  @JoinColumn(name = "user_id", referencedColumnName = "id")
+  public UserInfoEntity user;
 
   @ManyToOne
-  @JoinColumn(name = "event_id",referencedColumnName = "id")
+  @JoinColumn(name = "event_id", referencedColumnName = "id")
   private EventEntity event;
 
   @Column(name = "register_datetime")
-  private Date registerDatetime;
+  private LocalDateTime registerDatetime;
 }

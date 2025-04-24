@@ -54,4 +54,8 @@ public class UserInfoEntity {
 
 	@OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<EventEntity> managedEvents;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<EventRegistrationEntity> registration;
+
 }
