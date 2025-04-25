@@ -41,8 +41,9 @@ public class EventMapper {
     }
 
     public EventEntity convertToEventEntity(EventRequest request, UserInfoEntity owner){
+        UUID id = request.getId() == null ? UUID.randomUUID() : UUID.fromString(request.getId());
         return EventEntity.builder()
-                .id(UUID.randomUUID())
+                .id(id)
                 .title(request.getTitle())
                 .owner(owner)
                 .description(request.getDescription())

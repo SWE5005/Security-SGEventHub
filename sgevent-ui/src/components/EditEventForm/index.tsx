@@ -23,7 +23,6 @@ export interface EditEventFormProps {
   isDeleting?: boolean;
   isError?: boolean;
   isChipDisabled?: boolean;
-  userList?: any[];
 }
 
 const EditEventForm: React.FC<EditEventFormProps> = ({
@@ -35,7 +34,6 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
   isError,
   type,
   isChipDisabled = false,
-  userList = [],
 }) => {
   const [event, setEvent] = React.useState<SgehEvent>({} as SgehEvent);
 
@@ -144,7 +142,13 @@ const EditEventForm: React.FC<EditEventFormProps> = ({
       {type === 'view' ? (
         <FormControl sx={{ width: 1 / 2, mb: 2, mr: 2 }} variant="standard">
           <FormLabel component="legend">Event Member List</FormLabel>
-          <ChipList disabled={isChipDisabled} eventId={value?.id} items={userList} onDelete={onDelete} isDeleting={isDeleting ? isDeleting : false} />
+          <ChipList
+            disabled={isChipDisabled}
+            eventId={value?.id}
+            items={value?.userList}
+            onDelete={onDelete}
+            isDeleting={isDeleting ? isDeleting : false}
+          />
         </FormControl>
       ) : null}
       <br />

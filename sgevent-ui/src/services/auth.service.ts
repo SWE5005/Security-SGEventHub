@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../state/store';
 import { commonHeader } from '../utils';
 
@@ -13,10 +13,10 @@ export const authApi = createApi({
   }),
   endpoints: builder => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
-      queryFn: async credential => {
+      queryFn: async (credential, _api, _extraOptions, _baseQuery) => {
         try {
           const token = btoa(`${credential.emailAddress}:${credential.password}`);
-          const data = await fetch(process.env.GATSBY_BACKEND_API_URL + `/api/auth/sign-in`, {
+          const response = await fetch(process.env.GATSBY_BACKEND_API_URL + `/api/auth/sign-in`, {
             method: 'POST',
             headers: {
               Authorization: `Basic ${token}`,
@@ -24,13 +24,15 @@ export const authApi = createApi({
             },
             credentials: 'include',
           });
-          if (data.ok) {
-            return { data: data.json() };
+          if (response.ok) {
+            const data: LoginResponse = await response.json();
+            return { data };
           } else {
-            return Promise.reject(data);
+            const error: FetchBaseQueryError = await response.json();
+            return { error };
           }
         } catch (error) {
-          return { error };
+          return { error: error as FetchBaseQueryError };
         }
       },
     }),

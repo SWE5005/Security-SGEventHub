@@ -37,14 +37,15 @@ public class UserInfoMapper {
 
   public UserResponse convertToUserResponse(UserInfoEntity userInfo) {
     return UserResponse
-      .builder()
-      .userId(userInfo.getId())
-      .userName(userInfo.getUsername())
-      .activeStatus(userInfo.getActiveStatus())
-      .roles(userInfo.getRoles())
-      .emailAddress(userInfo.getEmailAddress())
-      .createDatetime(userInfo.getCreateDatetime())
-      .build();
+            .builder()
+            .userId(userInfo.getId())
+            .userName(userInfo.getUsername())
+            .mobileNumber(userInfo.getMobileNumber())
+            .activeStatus(userInfo.getActiveStatus())
+            .roles(userInfo.getRoles())
+            .emailAddress(userInfo.getEmailAddress())
+            .createDatetime(userInfo.getCreateDatetime())
+            .build();
   }
 
   public UserInfoEntity mapUserRequestToUserInfoEntity(
@@ -52,7 +53,7 @@ public class UserInfoMapper {
   ) {
     UserInfoEntity userInfoEntity = new UserInfoEntity();
     userInfoEntity.setId(UUID.randomUUID());
-    userInfoEntity.setUsername(userRequest.getUsername());
+    userInfoEntity.setUsername(userRequest.getUserName());
     userInfoEntity.setEmailAddress(userRequest.getEmailAddress());
     userInfoEntity.setMobileNumber(userRequest.getMobileNumber());
     userInfoEntity.setRoles(UserRoles.END_USER.name());

@@ -74,15 +74,15 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyAuthority('SCOPE_READ')")
-    @GetMapping (path="/{eventId}/register")
-    public ResponseEntity<?> registerEvent(Authentication authentication, @PathVariable @Valid @NotNull String eventId) {
-        log.info("[EventController:registerEvent]Request to register event started for user: {}",authentication.getName());
+    @GetMapping (path="/{eventId}/{type}/register")
+    public ResponseEntity<?> registerEvent(Authentication authentication, @PathVariable @Valid @NotNull String eventId, @PathVariable @Valid @NotNull String type) {
+        log.info("[EventController:registerEvent]Request to register/unregister event started for user: {}",authentication.getName());
         try {
             Jwt jwt = (Jwt) authentication.getCredentials();
             String userid = (String) jwt.getClaims().get("userid");
 
             return ResponseEntity.ok(new ApiResponse<>(
-                    eventService.registerEvent(eventId,userid),
+                    eventService.registerEvent(eventId, userid, type),
                     HttpStatus.OK.value(),
                     null));
         }catch (Exception e) {
@@ -92,4 +92,5 @@ public class EventController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

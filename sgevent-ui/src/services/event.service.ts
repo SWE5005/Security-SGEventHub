@@ -37,7 +37,7 @@ export const eventApi = createApi({
       }),
       providesTags: ['EventDetails'],
     }),
-    addEvent: builder.mutation<SgehEventResult, SgehEvent>({
+    saveEvent: builder.mutation<SgehEventResult, SgehEvent>({
       query: payload => ({
         url: '/create',
         method: 'POST',
@@ -52,29 +52,15 @@ export const eventApi = createApi({
       }),
       invalidatesTags: ['EventList'],
     }),
-    updateEvent: builder.mutation<void, SgehEvent>({
-      query: payload => ({
-        url: '/update',
-        method: 'POST',
-        body: payload,
-      }),
-      invalidatesTags: ['EventList', 'EventDetails'],
-    }),
-    registerEvent: builder.mutation<void, { type: string; eventId: string; userId: string }>({
-      query: ({ type, eventId, userId }) => ({
-        url: `api/event-manager/event/registration/${type}/${eventId}/${userId}`,
+    registerEvent: builder.mutation<void, RegisterRequest>({
+      query: ({ type, eventId }) => ({
+        url: `/${eventId}/${type}/register`,
         method: 'GET',
       }),
+      invalidatesTags: ['EventList', 'EventDetails'],
     }),
   }),
 });
 
 export const selectEvent = (state: RootState) => state[eventReducerName];
-export const {
-  useGetEventListQuery,
-  useGetEventDetailsQuery,
-  useAddEventMutation,
-  useDeleteEventMutation,
-  useUpdateEventMutation,
-  useRegisterEventMutation,
-} = eventApi;
+export const { useGetEventListQuery, useGetEventDetailsQuery, useSaveEventMutation, useDeleteEventMutation, useRegisterEventMutation } = eventApi;

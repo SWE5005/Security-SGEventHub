@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class ManageUserRequest
 {
     private String userId;
-    private String username;
+    private String userName;
     private String emailAddress;
     private String mobileNumber;
     private String activeStatus;

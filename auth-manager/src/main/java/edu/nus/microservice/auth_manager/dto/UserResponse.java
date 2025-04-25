@@ -17,6 +17,7 @@ import java.util.UUID;
 public class UserResponse {
     private UUID userId;
     private String userName;
+    private String mobileNumber;
     private String emailAddress;
     private String activeStatus;
     private String roles;

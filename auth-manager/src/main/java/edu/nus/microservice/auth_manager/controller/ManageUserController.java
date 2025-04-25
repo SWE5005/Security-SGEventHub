@@ -26,7 +26,7 @@ public class ManageUserController {
   @GetMapping(path = "/all")
   public ResponseEntity<?> getAllEventUsers(Principal principal) {
     log.info(
-      "[UserController:getAllUsers]Request to get userlist started for user: ",
+      "[UserController:getAllUsers]Request to get userlist started for user: {}",
       principal.getName()
     );
     try {
@@ -42,13 +42,15 @@ public class ManageUserController {
     }
   }
 
+
+  @PreAuthorize("hasAuthority('SCOPE_USER')")
   @PostMapping(path = "/create")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> createUser(
     @RequestBody CreateUserRequest userRequest
   ) {
     log.info(
-      "[UserController:createUser]Request to create user started for user: ",
+      "[UserController:createUser]Request to create user started for user: {}",
       userRequest.getEmailAddress()
     );
     try {
@@ -71,7 +73,7 @@ public class ManageUserController {
     @PathVariable @Valid @NotNull String userId
   ) {
     log.info(
-      "[UserController:getUserDetails]Request to get user details started for user: ",
+      "[UserController:getUserDetails]Request to get user details started for user: {}",
       principal.getName()
     );
     try {
@@ -98,11 +100,14 @@ public class ManageUserController {
     @RequestBody ManageUserRequest userRequest
   ) {
     log.info(
-      "[UserController:updateUser]Request to update user started for user: ",
+      "[UserController:updateUser]Request to update user started for user: {}",
       principal.getName()
     );
     try {
-      return ResponseEntity.ok(manageUserService.updateUser(userRequest));
+      return ResponseEntity.ok(new ApiResponse<>(
+              manageUserService.updateUser(userRequest),
+              HttpStatus.OK.value(),
+              null));
     } catch (Exception e) {
       log.error("[UserController:updateUser] Failed to update user", e);
       ApiResponse<String> response = new ApiResponse<>(
@@ -114,6 +119,7 @@ public class ManageUserController {
     }
   }
 
+  @PreAuthorize("hasAuthority('SCOPE_USER')")
   @DeleteMapping(path = "/{userId}/delete")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> deleteUser(
@@ -124,7 +130,10 @@ public class ManageUserController {
     );
     try {
       manageUserService.deleteUser(userId);
-      return ResponseEntity.ok("Delete user successfully.");
+      return ResponseEntity.ok(new ApiResponse<>(
+              "Delete user successfully.",
+              HttpStatus.OK.value(),
+              null));
     } catch (Exception e) {
       log.error("[UserController:deleteUser] Failed to delete user", e);
       ApiResponse<String> response = new ApiResponse<>(
