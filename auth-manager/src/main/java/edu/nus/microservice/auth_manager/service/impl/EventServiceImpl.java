@@ -92,12 +92,13 @@ public class EventServiceImpl implements EventService {
     }
   }
 
-  public EventEntity createEvent(EventRequest request, String userId) {
+  public EventDetailResponse createEvent(EventRequest request, String userId) {
     UUID userid = UUID.fromString(userId);
     Optional<UserInfoEntity> userInfo = userRepository.findById(userid);
     UserInfoEntity user = userInfo.get();
     EventEntity event = eventMapper.convertToEventEntity(request, user);
 
-    return eventRepository.save(event);
+    EventEntity result =  eventRepository.save(event);
+    return eventMapper.convertToEventDetails(result, userid);
   }
 }

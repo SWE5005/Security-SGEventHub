@@ -9,6 +9,6 @@ import java.util.List;
 public interface EventService {
   List<EventListResponse> getAllEvents(String userEmail);
   EventDetailResponse getEventDetails(String eventId, String userId);
-  EventEntity createEvent(EventRequest eventRequest, String userId);
+  EventDetailResponse createEvent(EventRequest eventRequest, String userId);
   String registerEvent(String eventId, String userId);
 }

@@ -1,23 +1,24 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import EventList from "../../components/EventList";
-import Layout from "../../components/Layout";
-import AdminPageLayout from "../../components/AdminPageLayout";
-import { navigate } from "gatsby";
-import { selectAuthSlice } from "../../state/auth/slice";
-import { useSelector } from "react-redux";
-import { type PageProps } from "gatsby";
+import React from 'react';
+import Button from '@mui/material/Button';
+import EventList from '../../components/EventList';
+import Layout from '../../components/Layout';
+import AdminPageLayout from '../../components/AdminPageLayout';
+import { navigate } from 'gatsby';
+import { selectAuthSlice } from '../../state/auth/slice';
+import { usePermission } from '../../components/Permission';
+import { useSelector } from 'react-redux';
+import { type PageProps } from 'gatsby';
 
 const EventPage: React.FC<PageProps> = () => {
-  const { userInfo } = useSelector((state) => selectAuthSlice(state));
+  const { userInfo } = useSelector(state => selectAuthSlice(state));
   const onAddClick = () => {
-    navigate("/events/add");
+    navigate('/events/add');
   };
-  const isAdmin = userInfo.roleId === 2 || userInfo.roleId === 3;
+  const isAdmin = usePermission(['EVENT_MANAGER', 'SUPER_ADMIN']);
   return (
     <Layout isLoading={false}>
       <AdminPageLayout
-        title={isAdmin ? "Manage Events" : "Events"}
+        title={isAdmin ? 'Manage Events' : 'Events'}
         rightEl={
           isAdmin ? (
             <Button variant="contained" onClick={onAddClick}>
@@ -30,6 +31,6 @@ const EventPage: React.FC<PageProps> = () => {
       </AdminPageLayout>
     </Layout>
   );
-}
+};
 
 export default EventPage;

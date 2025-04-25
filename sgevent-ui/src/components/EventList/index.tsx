@@ -36,15 +36,15 @@ const EventList: React.FC<EventListProps> = ({ isAdmin }) => {
     >
       {data?.map(item => (
         <EventCard
-          key={item.eventId} // 添加 key 属性
+          key={item.id}
           value={item}
           onDelete={deleteEvent}
-          isDeleting={deleteResult.isLoading} // 修正属性名
+          isDeleting={deleteResult.isLoading}
           onEdit={onEdit}
           onRegister={registerEvent}
           isAdmin={isAdmin}
           onDetails={onDetails}
-          isRegistering={registerResult?.originalArgs?.eventId === item.eventId ? registerResult.isLoading || isFetching : false}
+          isRegistering={registerResult?.originalArgs?.eventId === item.id ? registerResult.isLoading || isFetching : false}
         />
       ))}
     </Box>

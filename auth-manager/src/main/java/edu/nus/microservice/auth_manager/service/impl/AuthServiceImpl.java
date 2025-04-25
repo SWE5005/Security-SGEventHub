@@ -123,13 +123,13 @@ public class AuthServiceImpl implements  AuthService {
 
     }
 
-    public Object getAccessTokenUsingRefreshToken(String authorizationHeader) {
+    public Object getAccessTokenUsingRefreshToken(String cookieToken) {
 
-        if(!authorizationHeader.startsWith(TokenType.Bearer.name())){
+        if(cookieToken.isEmpty()){
             return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Please verify your token type");
         }
 
-        final String refreshToken = authorizationHeader.substring(7);
+        final String refreshToken = cookieToken;
 
         //Find refreshToken from database and should not be revoked : Same thing can be done through filter.
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)

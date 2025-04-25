@@ -6,11 +6,11 @@ import edu.nus.microservice.auth_manager.repository.RefreshTokenRepo;
 import edu.nus.microservice.auth_manager.utils.JwtTokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -45,16 +45,25 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
 
 
-            final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
             JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
-            if (!authHeader.startsWith("Bearer ")) {
+            Cookie[] cookies = request.getCookies();
+            String cookieToken = null;
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("refresh_token".equals(cookie.getName())) {
+                        cookieToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
+            if(cookieToken==null){
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            final String token = authHeader.substring(7);
+            final String token =  cookieToken;
             final Jwt jwtRefreshToken = jwtDecoder.decode(token);
 
 

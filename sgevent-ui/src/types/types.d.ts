@@ -1,15 +1,13 @@
 interface SgehEvent {
-  eventId: string;
-  eventTitle: string;
-  eventDesc: string;
-  eventCreateDt: Date;
-  eventStartDt: Date;
-  eventEndDt: Date;
-  eventPlace: string;
-  eventCapacity: number;
-  eventOwnerId: string;
-  eventStatus: string;
-  eventCover: string;
+  id: string;
+  title: string;
+  description: string;
+  startDatetime: string;
+  endDatetime: string;
+  location: string;
+  capacity: number;
+  status: string;
+  cover: string;
 }
 
 interface SgehEventReview {
