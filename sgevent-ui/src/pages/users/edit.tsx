@@ -8,6 +8,7 @@ import {
 } from "../../services/user.service";
 import { useGetRoleListQuery } from "../../services/role.service";
 import { navigate, PageProps } from "gatsby";
+import EditEvent from '../events/edit';
 
 const EditUser: React.FC<PageProps> = ({ location }) => {
     const params = new URLSearchParams(location.search);
@@ -45,3 +46,5 @@ const EditUser: React.FC<PageProps> = ({ location }) => {
         </Layout>
     );
 }
+
+export default EditUser;
