@@ -22,6 +22,7 @@ export const authApi = createApi({
               Authorization: `Basic ${token}`,
               'Content-Type': 'application/json',
             },
+            credentials: 'include',
           });
           if (data.ok) {
             return { data: data.json() };

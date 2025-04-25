@@ -64,8 +64,7 @@ public class EventController {
             //get userid from token
             Jwt jwt = (Jwt) authentication.getCredentials();
             String userid = (String) jwt.getClaims().get("userid");
-            eventService.createEvent(eventRequest,userid);
-            return ResponseEntity.ok("New event created successfully.");
+            return ResponseEntity.ok(eventService.createEvent(eventRequest,userid));
         }catch (Exception e) {
             log.error("[EventController:createEvent] Failed to create event", e);
             ApiResponse<String> response =

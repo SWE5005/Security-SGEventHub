@@ -17,6 +17,9 @@ const authSlice = createSlice({
       state.userInfo = {};
       state.isLoggedIn = false;
     },
+    setToken: (state, { payload }) => {
+      state.userInfo = payload; // Update the userinfo with new access_token
+    },
   },
   extraReducers: builder => {
     // Process login/registration success via RTK Query
@@ -43,7 +46,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { logout, setToken } = authSlice.actions;
 export default authSlice.reducer;
 
 export const selectAuthSlice = (state: RootState) => state[AUTH_SLICE_NAME];

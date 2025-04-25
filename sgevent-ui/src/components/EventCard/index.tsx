@@ -33,7 +33,7 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
         <Grid container spacing={2}>
           <Grid item xs={3}>
             {value ? (
-              <img style={{ width: '100%', height: '100%' }} alt={value.eventTitle} src={value.eventCover || img} />
+              <img style={{ width: '100%', height: '100%' }} alt={value.title} src={value.cover || img} />
             ) : (
               <Skeleton variant="rectangular" width="100%" height="100%" />
             )}
@@ -42,16 +42,16 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
             {value ? (
               <Box sx={{ height: 110 }}>
                 <Typography gutterBottom variant="h6">
-                  {value.eventTitle}
+                  {value.title}
                 </Typography>
                 <Typography display="block" variant="caption" color="text.secondary">
-                  {value.eventDesc}
+                  {value.description}
                 </Typography>
                 <Typography display="block" variant="caption" color="text.secondary">
-                  {`Event Time: ${getFormattedTime(value.eventStartDt)}`}
+                  {`Event Time: ${getFormattedTime(value.startDatetime)}`}
                 </Typography>
                 <Typography display="block" variant="caption" color="text.secondary">
-                  {`Capacity: ${value.registrationCount}/${value.eventCapacity}`}
+                  {`Capacity: ${value.registrationCount}/${value.capacity}`}
                 </Typography>
                 <Typography
                   display="block"
@@ -66,7 +66,7 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
                     display: '-webkit-box',
                   }}
                 >
-                  {`Location: ${value.eventPlace}`}
+                  {`Location: ${value.location}`}
                 </Typography>
               </Box>
             ) : (
@@ -91,17 +91,17 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
                     color="primary"
                     aria-label="Edit"
                     onClick={() => {
-                      onEdit(value.eventId);
+                      onEdit(value.id);
                     }}
                   >
                     <EditIcon />
                   </IconButton>
                   <DeleteModal
                     onDelete={() => {
-                      onDelete(value.eventId);
+                      onDelete(value.id);
                     }}
                     title="Delete event?"
-                    label={`Are you sure to delete ${value.eventTitle}?`}
+                    label={`Are you sure to delete ${value.title}?`}
                   />
                 </Box>
               ) : (
@@ -122,8 +122,8 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
                     onClick={() => {
                       onRegister({
                         type: value?.registered ? 'unregister' : 'register',
-                        eventId: value.eventId,
-                        userId: userInfo.userId,
+                        eventId: value.id,
+                        userId: userInfo.user_name,
                       });
                     }}
                   >
@@ -133,7 +133,7 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
                   <LoadingButton
                     variant="outlined"
                     onClick={() => {
-                      onDetails(value.eventId); // 修改这里，直接传递 eventId
+                      onDetails(value.id);
                     }}
                   >
                     Details

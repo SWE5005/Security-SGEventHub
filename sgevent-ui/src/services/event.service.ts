@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { commonHeader } from '../utils';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { fetchBaseQueryAuthMiddleware, commonHeader } from '../utils';
 import { RootState } from '../state/store';
 
 export const eventReducerName = 'eventApi';
@@ -15,7 +15,7 @@ interface SgehEventDetails extends SgehEvent {
 
 export const eventApi = createApi({
   reducerPath: eventReducerName,
-  baseQuery: fetchBaseQuery({
+  baseQuery: fetchBaseQueryAuthMiddleware({
     baseUrl: process.env.GATSBY_BACKEND_API_URL + '/api/event',
     prepareHeaders: commonHeader,
     credentials: 'include',
@@ -31,15 +31,15 @@ export const eventApi = createApi({
       providesTags: ['EventList'],
     }),
     getEventDetails: builder.query<SgehEventDetails, string>({
-      query: id => ({
-        url: `api/event-manager/event/details?eventid=${id}`,
+      query: eventId => ({
+        url: `/${eventId}/details`,
         method: 'GET',
       }),
       providesTags: ['EventDetails'],
     }),
     addEvent: builder.mutation<SgehEventResult, SgehEvent>({
       query: payload => ({
-        url: 'api/event-manager/event/create',
+        url: '/create',
         method: 'POST',
         body: payload,
       }),
@@ -54,7 +54,7 @@ export const eventApi = createApi({
     }),
     updateEvent: builder.mutation<void, SgehEvent>({
       query: payload => ({
-        url: 'api/event-manager/event/update',
+        url: '/update',
         method: 'POST',
         body: payload,
       }),
