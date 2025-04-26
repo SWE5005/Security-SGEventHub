@@ -3,11 +3,14 @@ import Layout from '../../components/Layout';
 import EventReview from '../../components/EventReview';
 import { useGetEventDetailsQuery } from '../../services/event.service';
 import EditEventForm from '../../components/EditEventForm';
+import { selectAuthSlice } from '../../state/auth/slice';
+import { useSelector } from 'react-redux';
 import { type PageProps } from 'gatsby';
 
 const EventDetailsPage: React.FC<PageProps> = ({ location }) => {
   const params = new URLSearchParams(location.search);
   const eventId = params.get('eventid');
+  const { userInfo } = useSelector(state => selectAuthSlice(state));
 
   if (eventId === null) {
     throw new Error('Event ID is null');
@@ -24,7 +27,7 @@ const EventDetailsPage: React.FC<PageProps> = ({ location }) => {
             <br />
             <br />
             <br />
-            {/* <EventReview eventId={eventId} userId={userInfo.user_name} /> */}
+            <EventReview eventId={eventId} userId={userInfo.user_name} />
           </>
         ) : (
           <p>Loading event details...</p>

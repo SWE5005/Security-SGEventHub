@@ -92,4 +92,4 @@ interface SgehEventDetails extends SgehEvent {
   userList: SgehEventRegistration[];
 }
 
-type SgehEventReviewReq = Omit<SgehEventReview, 'reviewId'>;
+type SgehEventReviewReq = Omit<SgehEventReview, 'reviewId', 'userId'>;
