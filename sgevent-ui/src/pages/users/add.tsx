@@ -4,6 +4,7 @@ import AdminPageLayout from '../../components/AdminPageLayout';
 import EditUserForm from '../../components/EditUserForm';
 import { useAddUserMutation } from '../../services/user.service';
 import { navigate, PageProps } from 'gatsby';
+import Permission from '../../components/Permission';
 
 const AddUser: React.FC<PageProps> = ({ location }) => {
   const [addUser, result] = useAddUserMutation();
@@ -16,11 +17,13 @@ const AddUser: React.FC<PageProps> = ({ location }) => {
     addUser(user);
   };
   return (
-    <Layout isLoading={false}>
-      <AdminPageLayout title="Add New User">
-        <EditUserForm isEdit={false} value={{}} onSubmit={onAddUser} isUpdating={result.isLoading} isError={result.isError} />
-      </AdminPageLayout>
-    </Layout>
+    <Permission authKeyList={['SUPER_ADMIN']}>
+      <Layout isLoading={false}>
+        <AdminPageLayout title="Add New User">
+          <EditUserForm isEdit={false} value={{}} onSubmit={onAddUser} isUpdating={result.isLoading} isError={result.isError} />
+        </AdminPageLayout>
+      </Layout>
+    </Permission>
   );
 };
 

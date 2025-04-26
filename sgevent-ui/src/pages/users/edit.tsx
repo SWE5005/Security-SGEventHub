@@ -4,6 +4,7 @@ import AdminPageLayout from '../../components/AdminPageLayout';
 import EditUserForm from '../../components/EditUserForm';
 import { useGetUserDetailsQuery, useUpdateUserMutation } from '../../services/user.service';
 import { navigate, PageProps } from 'gatsby';
+import Permission from '../../components/Permission';
 
 const EditUser: React.FC<PageProps> = ({ location }) => {
   const params = new URLSearchParams(location.search);
@@ -25,11 +26,13 @@ const EditUser: React.FC<PageProps> = ({ location }) => {
   };
 
   return (
-    <Layout isLoading={isLoading}>
-      <AdminPageLayout title="Edit User">
-        <EditUserForm isEdit value={data} onSubmit={onUpdateUser} isUpdating={result.isLoading} isError={result.isError} />
-      </AdminPageLayout>
-    </Layout>
+    <Permission authKeyList={['SUPER_ADMIN']}>
+      <Layout isLoading={isLoading}>
+        <AdminPageLayout title="Edit User">
+          <EditUserForm isEdit value={data} onSubmit={onUpdateUser} isUpdating={result.isLoading} isError={result.isError} />
+        </AdminPageLayout>
+      </Layout>
+    </Permission>
   );
 };
 
