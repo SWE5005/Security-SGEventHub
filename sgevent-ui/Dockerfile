@@ -9,6 +9,7 @@ COPY gatsby-node.ts ./
 COPY gatsby-browser.tsx ./
 COPY gatsby-ssr.tsx ./
 COPY src ./src/
+COPY static ./static/
 
 RUN npm ci --ignore-scripts --cpu=x64 --os=linux
 RUN npm run build
