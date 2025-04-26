@@ -6,6 +6,7 @@ import { navigate } from 'gatsby';
 import EditEventForm from '../../components/EditEventForm';
 import Button from '@mui/material/Button';
 import { type PageProps } from 'gatsby';
+import Permission from '../../components/Permission';
 
 const EditEvent: React.FC<PageProps> = ({ location }) => {
   const params = new URLSearchParams(location.search);
@@ -28,31 +29,33 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
     updateEvent(event);
   };
   return (
-    <Layout isLoading={isFetching}>
-      <AdminPageLayout
-        title={type === 'view' ? 'Event Details' : 'Edit Event'}
-        rightEl={
-          <Button
-            variant="contained"
-            onClick={() => {
-              setType(prev => (prev === 'view' ? 'edit' : 'view'));
-            }}
-          >
-            {type === 'view' ? 'Edit Event Info' : 'View Event Details'}
-          </Button>
-        }
-      >
-        <EditEventForm
-          type={type}
-          value={data}
-          onSubmit={onUpdateUser}
-          onDelete={removeParticipant}
-          isDeleting={removeResult.isLoading}
-          isUpdating={result.isLoading}
-          isError={result.isError}
-        />
-      </AdminPageLayout>
-    </Layout>
+    <Permission authKeyList={['SUPER_ADMIN', 'EVENT_MANAGER']}>
+      <Layout isLoading={isFetching}>
+        <AdminPageLayout
+          title={type === 'view' ? 'Event Details' : 'Edit Event'}
+          rightEl={
+            <Button
+              variant="contained"
+              onClick={() => {
+                setType(prev => (prev === 'view' ? 'edit' : 'view'));
+              }}
+            >
+              {type === 'view' ? 'Edit Event Info' : 'View Event Details'}
+            </Button>
+          }
+        >
+          <EditEventForm
+            type={type}
+            value={data}
+            onSubmit={onUpdateUser}
+            onDelete={removeParticipant}
+            isDeleting={removeResult.isLoading}
+            isUpdating={result.isLoading}
+            isError={result.isError}
+          />
+        </AdminPageLayout>
+      </Layout>
+    </Permission>
   );
 };
 
