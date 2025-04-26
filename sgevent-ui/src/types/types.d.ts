@@ -83,6 +83,11 @@ interface RegisterRequest {
   eventId: string;
 }
 
+interface RemoveParticipantRequest {
+  userId: string;
+  eventId: string;
+}
+
 interface SgehEventDetails extends SgehEvent {
   userList: SgehEventRegistration[];
 }

@@ -9,5 +9,6 @@ public interface EventService {
   List<EventListResponse> getAllEvents(String userEmail);
   EventDetailResponse getEventDetails(String eventId, String userId);
   EventDetailResponse createEvent(EventRequest eventRequest, String userId);
+  String deleteEvent(String eventId);
   String registerEvent(String eventId, String userId, String type);
 }

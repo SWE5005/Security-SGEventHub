@@ -46,8 +46,8 @@ export const eventApi = createApi({
       invalidatesTags: ['EventList'],
     }),
     deleteEvent: builder.mutation<void, string>({
-      query: id => ({
-        url: `api/event-manager/event/delete/${id}`,
+      query: eventId => ({
+        url: `/${eventId}/delete`,
         method: 'DELETE',
       }),
       invalidatesTags: ['EventList'],
@@ -59,8 +59,22 @@ export const eventApi = createApi({
       }),
       invalidatesTags: ['EventList', 'EventDetails'],
     }),
+    removeParticipant: builder.mutation<void, RemoveParticipantRequest>({
+      query: ({ userId, eventId }) => ({
+        url: `/${eventId}/${userId}/removeParticipant`,
+        method: 'GET',
+      }),
+      invalidatesTags: ['EventDetails'],
+    }),
   }),
 });
 
 export const selectEvent = (state: RootState) => state[eventReducerName];
-export const { useGetEventListQuery, useGetEventDetailsQuery, useSaveEventMutation, useDeleteEventMutation, useRegisterEventMutation } = eventApi;
+export const {
+  useGetEventListQuery,
+  useGetEventDetailsQuery,
+  useSaveEventMutation,
+  useDeleteEventMutation,
+  useRegisterEventMutation,
+  useRemoveParticipantMutation,
+} = eventApi;

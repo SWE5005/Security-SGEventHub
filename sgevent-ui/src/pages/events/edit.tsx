@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Layout from '../../components/Layout';
 import AdminPageLayout from '../../components/AdminPageLayout';
-import { useGetEventDetailsQuery, useSaveEventMutation, useRegisterEventMutation } from '../../services/event.service';
+import { useGetEventDetailsQuery, useSaveEventMutation, useRemoveParticipantMutation } from '../../services/event.service';
 import { navigate } from 'gatsby';
 import EditEventForm from '../../components/EditEventForm';
 import Button from '@mui/material/Button';
@@ -17,7 +17,7 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
 
   const { data, error, isFetching, refetch } = useGetEventDetailsQuery(eventId);
   const [updateEvent, result] = useSaveEventMutation();
-  const [registerEvent, registerResult] = useRegisterEventMutation();
+  const [removeParticipant, removeResult] = useRemoveParticipantMutation();
   const [type, setType] = useState('view');
 
   useEffect(() => {
@@ -46,8 +46,8 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
           type={type}
           value={data}
           onSubmit={onUpdateUser}
-          onDelete={registerEvent}
-          isDeleting={registerResult.isLoading}
+          onDelete={removeParticipant}
+          isDeleting={removeResult.isLoading}
           isUpdating={result.isLoading}
           isError={result.isError}
         />

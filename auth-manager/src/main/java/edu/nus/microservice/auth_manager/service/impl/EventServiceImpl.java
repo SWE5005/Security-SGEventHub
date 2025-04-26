@@ -104,4 +104,15 @@ public class EventServiceImpl implements EventService {
     EventEntity result =  eventRepository.save(event);
     return eventMapper.convertToEventDetails(result, userid);
   }
+
+  public String deleteEvent(String eventId) {
+    try {
+      UUID evtId = UUID.fromString(eventId);
+      eventRepository.deleteById(evtId);
+      return "Success: Delete Event successfully.";
+    }catch (Exception e){
+      log.error("[EventService:deleteEvent]:Failed to delete event.", e);
+      throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error:" + e);
+    }
+  }
 }
