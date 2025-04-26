@@ -9,9 +9,15 @@ export interface PermissionProps {
 }
 
 const Permission: React.FC<PermissionProps> = ({ authKeyList, children }) => {
+  const { isLoggedIn } = useSelector(state => selectAuthSlice(state));
   const hasPermission = usePermission(authKeyList);
-  //if user does not have permission to access, navigate to 401 page
-  if (!hasPermission) navigate('/401');
+  if (!isLoggedIn) {
+    //if user is not logged in, navigate to login page
+    navigate('/login');
+  } else if (!hasPermission) {
+    //if user does not have permission to access, navigate to 401 page
+    navigate('/401');
+  }
   return children;
 };
 

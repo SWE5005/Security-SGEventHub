@@ -5,6 +5,7 @@ import { useGetEventDetailsQuery } from '../../services/event.service';
 import EditEventForm from '../../components/EditEventForm';
 import { selectAuthSlice } from '../../state/auth/slice';
 import { useSelector } from 'react-redux';
+import Permission from '../../components/Permission';
 import { type PageProps } from 'gatsby';
 
 const EventDetailsPage: React.FC<PageProps> = ({ location }) => {
@@ -19,21 +20,23 @@ const EventDetailsPage: React.FC<PageProps> = ({ location }) => {
   const { data: eventData } = useGetEventDetailsQuery(eventId);
 
   return (
-    <Layout isLoading={false}>
-      <div>
-        {eventData ? (
-          <>
-            <EditEventForm value={eventData} type="view" isChipDisabled />
-            <br />
-            <br />
-            <br />
-            <EventReview eventId={eventId} userId={userInfo.user_name} />
-          </>
-        ) : (
-          <p>Loading event details...</p>
-        )}
-      </div>
-    </Layout>
+    <Permission authKeyList={['SUPER_ADMIN', 'EVENT_MANAGER', 'END_USER']}>
+      <Layout isLoading={false}>
+        <div>
+          {eventData ? (
+            <>
+              <EditEventForm value={eventData} type="view" isChipDisabled />
+              <br />
+              <br />
+              <br />
+              <EventReview eventId={eventId} userId={userInfo.user_name} />
+            </>
+          ) : (
+            <p>Loading event details...</p>
+          )}
+        </div>
+      </Layout>
+    </Permission>
   );
 };
 

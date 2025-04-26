@@ -12,8 +12,8 @@ export default function UserPage() {
     navigate('/users/add');
   };
   return (
-    <Layout isLoading={false}>
-      <Permission authKeyList={['SUPER_ADMIN']}>
+    <Permission authKeyList={['SUPER_ADMIN']}>
+      <Layout isLoading={false}>
         <AdminPageLayout
           title="Manage Users"
           rightEl={
@@ -26,7 +26,7 @@ export default function UserPage() {
             <UserList />
           </Box>
         </AdminPageLayout>
-      </Permission>
-    </Layout>
+      </Layout>
+    </Permission>
   );
 }
