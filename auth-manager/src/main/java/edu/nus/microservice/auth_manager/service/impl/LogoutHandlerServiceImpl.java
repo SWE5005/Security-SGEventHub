@@ -56,7 +56,7 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
             token.setRevoked(true);
             refreshTokenRepo.save(token);
         });
-        // 👇 Remove the refresh_token cookie
+        // Remove the refresh_token cookie from client
         Cookie deleteCookie = new Cookie("refresh_token", null);
         deleteCookie.setHttpOnly(true);
         deleteCookie.setSecure(true);
