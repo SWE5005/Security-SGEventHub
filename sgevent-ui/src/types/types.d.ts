@@ -27,12 +27,13 @@ interface SgehEventRegistration {
 }
 
 interface SgehUser {
-  userId: string;
+  userId?: string;
   userName: string;
+  mobileNumber: string;
   emailAddress: string;
-  activeStatus: number;
-  roleId: number;
-  createDt: string;
+  activeStatus: string;
+  roles: string;
+  createDt?: string;
 }
 
 interface SgehUserDetail extends SgehUser {
@@ -77,8 +78,18 @@ interface EventUserResponse {
   createDt: string;
 }
 
+interface RegisterRequest {
+  type: string;
+  eventId: string;
+}
+
+interface RemoveParticipantRequest {
+  userId: string;
+  eventId: string;
+}
+
 interface SgehEventDetails extends SgehEvent {
   userList: SgehEventRegistration[];
 }
 
-type SgehEventReviewReq = Omit<SgehEventReview, 'reviewId'>;
+type SgehEventReviewReq = Omit<SgehEventReview, 'reviewId', 'userId'>;

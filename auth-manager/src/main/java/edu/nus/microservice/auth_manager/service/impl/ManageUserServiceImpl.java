@@ -79,7 +79,7 @@ public class ManageUserServiceImpl implements ManageUserService {
     public String updateUser(ManageUserRequest userRequest){
         try {
             UUID id = UUID.fromString(userRequest.getUserId());
-            Integer result = userRepository.updateUser(id, userRequest.getUsername(), userRequest.getMobileNumber(), userRequest.getRoles(), userRequest.getActiveStatus());
+            Integer result = userRepository.updateUser(id, userRequest.getUserName(), userRequest.getMobileNumber(), userRequest.getRoles(), userRequest.getActiveStatus());
             if (result==0) return "Failed to update user.";
             return "Update user successfully.";
         } catch (Exception e) {

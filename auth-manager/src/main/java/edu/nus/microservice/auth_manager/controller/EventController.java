@@ -2,6 +2,7 @@ package edu.nus.microservice.auth_manager.controller;
 
 import edu.nus.microservice.auth_manager.dto.ApiResponse;
 import edu.nus.microservice.auth_manager.dto.EventRequest;
+import edu.nus.microservice.auth_manager.enums.RegistrationTypes;
 import edu.nus.microservice.auth_manager.service.EventService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -74,15 +75,15 @@ public class EventController {
     }
 
     @PreAuthorize("hasAnyAuthority('SCOPE_READ')")
-    @GetMapping (path="/{eventId}/register")
-    public ResponseEntity<?> registerEvent(Authentication authentication, @PathVariable @Valid @NotNull String eventId) {
-        log.info("[EventController:registerEvent]Request to register event started for user: {}",authentication.getName());
+    @GetMapping (path="/{eventId}/{type}/register")
+    public ResponseEntity<?> registerEvent(Authentication authentication, @PathVariable @Valid @NotNull String eventId, @PathVariable @Valid @NotNull String type) {
+        log.info("[EventController:registerEvent]Request to register/unregister event started for user: {}",authentication.getName());
         try {
             Jwt jwt = (Jwt) authentication.getCredentials();
             String userid = (String) jwt.getClaims().get("userid");
 
             return ResponseEntity.ok(new ApiResponse<>(
-                    eventService.registerEvent(eventId,userid),
+                    eventService.registerEvent(eventId, userid, type),
                     HttpStatus.OK.value(),
                     null));
         }catch (Exception e) {
@@ -92,4 +93,40 @@ public class EventController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PreAuthorize("hasAnyAuthority('SCOPE_EVENT')")
+    @GetMapping (path="/{eventId}/{userId}/removeParticipant")
+    public ResponseEntity<?> removeParticipant(Authentication authentication, @PathVariable @Valid @NotNull String eventId, @PathVariable @Valid @NotNull String userId) {
+        log.info("[EventController:removeParticipant]Request to remove participant from event started for user: {}", authentication.getName());
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    eventService.registerEvent(eventId, userId, RegistrationTypes.UNREGISTER.name()),
+                    HttpStatus.OK.value(),
+                    null));
+        }catch (Exception e) {
+            log.error("[EventController:removeParticipant] Failed to remove participant", e);
+            ApiResponse<String> response =
+                    new ApiResponse<>("Failed to remove participant from event", HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_EVENT')")
+    @DeleteMapping (path="/{eventId}/delete")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> deleteEvent(Authentication authentication, @PathVariable @Valid @NotNull String eventId) {
+        log.info("[EventController:deleteEvent]Request to delete event started for user: {}", authentication.getName());
+        try {
+            return ResponseEntity.ok(new ApiResponse<>(
+                    eventService.deleteEvent(eventId),
+                    HttpStatus.OK.value(),
+                    null));
+        }catch (Exception e) {
+            log.error("[EventController:deleteEvent] Failed to delete event", e);
+            ApiResponse<String> response =
+                    new ApiResponse<>("Failed to delete event.", HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

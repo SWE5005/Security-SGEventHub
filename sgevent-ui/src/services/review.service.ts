@@ -1,27 +1,28 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { commonHeader } from '../utils/index';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { fetchBaseQueryAuthMiddleware, commonHeader } from '../utils';
 import { RootState } from '../state/store';
 
 export const reviewReducerName = 'reviewApi';
 
 export const reviewApi = createApi({
   reducerPath: reviewReducerName,
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.GATSBY_BACKEND_API_URL,
+  baseQuery: fetchBaseQueryAuthMiddleware({
+    baseUrl: process.env.GATSBY_BACKEND_API_URL + '/api/feedback',
     prepareHeaders: commonHeader,
+    credentials: 'include',
   }),
   refetchOnMountOrArgChange: true,
   endpoints: builder => ({
     postEventReview: builder.mutation<SgehEventReview, SgehEventReviewReq>({
-      query: ({ eventId, userId, rating, comment }) => ({
-        url: 'api/event-manager/review/add',
+      query: ({ eventId, rating, comment }) => ({
+        url: '/create',
         method: 'POST',
-        body: { eventId, userId, rating, comment },
+        body: { eventId, rating, comment },
       }),
     }),
     getEventReviews: builder.query<SgehEventReview[], string>({
       query: eventId => ({
-        url: `api/event-manager/review/event/${eventId}`,
+        url: `/${eventId}/list`,
         method: 'GET',
       }),
     }),

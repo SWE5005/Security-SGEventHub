@@ -9,6 +9,7 @@ import lombok.*;
 @Table(name = "event_registration")
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 @Builder
 public class EventRegistrationEntity {
 

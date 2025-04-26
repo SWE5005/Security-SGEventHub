@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateUserRequest
-{
-    private String userName;
-    private String emailAddress;
-    private String mobileNumber;
+public class FeedbackRequest {
+
+  private String eventId;
+  private int rating;
+  private String comment;
 }

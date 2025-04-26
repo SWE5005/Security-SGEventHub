@@ -18,7 +18,7 @@ export interface EventCardProps {
   value: any;
   onEdit: (eventId: string) => void;
   onDelete: (eventId: string) => void;
-  onRegister: (params: { type: string; eventId: string; userId: string }) => void;
+  onRegister: (params: { type: string; eventId: string }) => void;
   onDetails: (eventId: string) => void;
   isAdmin: boolean;
   isRegistering: boolean;
@@ -121,9 +121,8 @@ const EventCard: React.FC<EventCardProps> = ({ value, onEdit, onDelete, onRegist
                     loading={isRegistering}
                     onClick={() => {
                       onRegister({
-                        type: value?.registered ? 'unregister' : 'register',
+                        type: value?.registered ? 'UNREGISTER' : 'REGISTER',
                         eventId: value.id,
-                        userId: userInfo.user_name,
                       });
                     }}
                   >

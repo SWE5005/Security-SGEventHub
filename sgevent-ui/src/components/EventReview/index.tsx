@@ -15,7 +15,7 @@ interface EventReviewProps {
 const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
   const theme = useTheme();
   const { data: reviews, isLoading, refetch } = useGetEventReviewsQuery(eventId);
-  const [postReview ] = usePostEventReviewMutation();
+  const [postReview] = usePostEventReviewMutation();
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -30,7 +30,7 @@ const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await postReview({ eventId, userId, rating, comment }).unwrap();
+    const result = await postReview({ eventId, rating, comment }).unwrap();
     if (result) {
       setRating(0);
       setComment('');
@@ -46,8 +46,11 @@ const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
 
   return (
     <Box>
-      <Typography variant="h6" style={{ color: theme.palette.primary.main, fontSize: '1.5rem' }}>Event Reviews</Typography>
-      <br /><br />
+      <Typography variant="h6" style={{ color: theme.palette.primary.main, fontSize: '1.5rem' }}>
+        Event Reviews
+      </Typography>
+      <br />
+      <br />
       {isLoading ? (
         <p>Loading reviews...</p>
       ) : reviews && reviews.length > 0 ? (
@@ -62,10 +65,14 @@ const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
       ) : (
         <Typography>No reviews yet</Typography>
       )}
-      <br /><br /><br />
+      <br />
+      <br />
+      <br />
       {!userHasReviewed && (
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <Typography variant="h6" style={{ color: theme.palette.primary.main, fontSize: '1.5rem' }}>Write a Review</Typography>
+          <Typography variant="h6" style={{ color: theme.palette.primary.main, fontSize: '1.5rem' }}>
+            Write a Review
+          </Typography>
           <Rating
             name="simple-controlled"
             value={rating}
@@ -81,11 +88,13 @@ const EventReview: React.FC<EventReviewProps> = ({ eventId, userId }) => {
             fullWidth
             rows={4}
             value={comment}
-            onChange={(e) => setComment(e.target.value)}
+            onChange={e => setComment(e.target.value)}
             margin="normal"
             required
           />
-          <Button type="submit" variant="contained" sx={{ mt: 2 }}>Submit Review</Button>
+          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+            Submit Review
+          </Button>
         </Box>
       )}
       {userHasReviewed && <Typography color="secondary">You have already reviewed this event.</Typography>}

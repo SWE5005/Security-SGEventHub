@@ -6,6 +6,7 @@ import edu.nus.microservice.auth_manager.dto.EventRequest;
 import edu.nus.microservice.auth_manager.entity.EventEntity;
 import edu.nus.microservice.auth_manager.entity.EventRegistrationEntity;
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
+import edu.nus.microservice.auth_manager.enums.RegistrationTypes;
 import edu.nus.microservice.auth_manager.mapper.EventMapper;
 import edu.nus.microservice.auth_manager.mapper.EventRegistrationMapper;
 import edu.nus.microservice.auth_manager.repository.EventRegistrationRepository;
@@ -59,14 +60,13 @@ public class EventServiceImpl implements EventService {
     return eventMapper.convertToEventDetails(eventDetail.get(), usrid);
   }
 
-  public String registerEvent(String eventId, String userId) {
+  public String registerEvent(String eventId, String userId, String type) {
     try {
       UUID evtId = UUID.fromString(eventId);
       UUID usrId = UUID.fromString(userId);
       //check whether user has aldy registered to the current event
-      if (
-        eventRegistrationRepo.findByUserIdAndEventId(usrId, evtId).isEmpty()
-      ) {
+      Optional<EventRegistrationEntity> registrationEntity = eventRegistrationRepo.findByUserIdAndEventId(usrId, evtId);
+      if (RegistrationTypes.REGISTER.name().equals(type) && registrationEntity.isEmpty()) {
         Optional<EventEntity> event = eventRepository.findById(evtId);
         Optional<UserInfoEntity> user = userRepository.findById(usrId);
         EventRegistrationEntity evtRegistration = eventRegistrationMapper.convertToEventRegistration(
@@ -75,14 +75,17 @@ public class EventServiceImpl implements EventService {
         );
         eventRegistrationRepo.save(evtRegistration);
         return "User has been registered to the targeted event";
+      } else if (RegistrationTypes.UNREGISTER.name().equals(type) && registrationEntity.isPresent()) {
+        eventRegistrationRepo.deleteById(registrationEntity.get().getId());
+        return "User has been unregistered from the targeted event";
       } else {
         throw new Exception(
-          "Failed: user has already registered to the current event"
+          "Failed: user has already registered/unregistered to the current event"
         );
       }
     } catch (Exception e) {
       log.error(
-        "[EventService:registerEvent]:Failed to register user to event",
+        "[EventService:registerEvent]:Failed to register/unregister user to event",
         e
       );
       throw new HttpClientErrorException(
@@ -100,5 +103,16 @@ public class EventServiceImpl implements EventService {
 
     EventEntity result =  eventRepository.save(event);
     return eventMapper.convertToEventDetails(result, userid);
+  }
+
+  public String deleteEvent(String eventId) {
+    try {
+      UUID evtId = UUID.fromString(eventId);
+      eventRepository.deleteById(evtId);
+      return "Success: Delete Event successfully.";
+    }catch (Exception e){
+      log.error("[EventService:deleteEvent]:Failed to delete event.", e);
+      throw new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Error:" + e);
+    }
   }
 }
