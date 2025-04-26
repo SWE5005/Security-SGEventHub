@@ -48,122 +48,122 @@ services:
 
     sgeh-web:
         labels:
-          - traefik.enable=true
-          - traefik.http.routers.web.entrypoints=web
-          - traefik.http.routers.web.rule=PathPrefix(`/`)
-          - traefik.http.routers.web.middlewares=cors
-          - traefik.http.services.web.loadbalancer.server.port=8080
+            - traefik.enable=true
+            - traefik.http.routers.web.entrypoints=web
+            - traefik.http.routers.web.rule=PathPrefix(`/`)
+            - traefik.http.routers.web.middlewares=cors
+            - traefik.http.services.web.loadbalancer.server.port=8080
         image: sgeh-web:2.0
         build:
-          context: ./sgevent-ui
-          dockerfile: Dockerfile
-          args:
-            - APP_VERSION=${APP_VERSION}
-            - REVISION=${REVISION}
+            context: ./sgevent-ui
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
         hostname: sgeh-web
         container_name: sgeh-web
         environment:
-          - GATSBY_AUTH_MANAGER_API_URL=http://sgeh-auth-manager:8080/
-          - GATSBY_USER_MANAGER_API_URL=http://sgeh-user-manager:8080/
-          - GATSBY_EVENT_MANAGER_API_URL=http://sgeh-event-manager:8080/
-          - GATSBY_ONE_MAP_API_URL=https://www.onemap.gov.sg/api/common/elastic/
+            - GATSBY_AUTH_MANAGER_API_URL=http://sgeh-auth-manager:8080/
+            - GATSBY_USER_MANAGER_API_URL=http://sgeh-user-manager:8080/
+            - GATSBY_EVENT_MANAGER_API_URL=http://sgeh-event-manager:8080/
+            - GATSBY_ONE_MAP_API_URL=https://www.onemap.gov.sg/api/common/elastic/
         expose:
-          - 8080
+            - 8080
 
     sgeh-user-manager:
         labels:
-          - traefik.enable=true
-          - traefik.http.routers.user.entrypoints=user
-          - traefik.http.routers.user.rule=PathPrefix(`/`)
-          - traefik.http.routers.user.middlewares=cors
-          - traefik.http.services.user.loadbalancer.server.port=8080
+            - traefik.enable=true
+            - traefik.http.routers.user.entrypoints=user
+            - traefik.http.routers.user.rule=PathPrefix(`/`)
+            - traefik.http.routers.user.middlewares=cors
+            - traefik.http.services.user.loadbalancer.server.port=8080
         image: user-manager:2.0
         build:
-          context: ./user-manager
-          dockerfile: Dockerfile
-          args:
-            - APP_VERSION=${APP_VERSION}
-            - REVISION=${REVISION}
+            context: ./user-manager
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
         hostname: user-manager
         container_name: user-manager
         environment:
-          - spring.application.name=user-manager
-          - spring.jpa.hibernate.ddl-auto=update
-          - spring.jpa.show-sql=true
-          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
-          - spring.datasource.username=${DEV_USER}
-          - spring.datasource.password=${DEV_PASSWORD}
-          - spring.http.encoding.charset=UTF-8
-          - spring.http.encoding.enabled=true
-          - spring.http.encoding.force=true
-          - server.port=8080
+            - spring.application.name=user-manager
+            - spring.jpa.hibernate.ddl-auto=update
+            - spring.jpa.show-sql=true
+            - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+            - spring.datasource.username=${DEV_USER}
+            - spring.datasource.password=${DEV_PASSWORD}
+            - spring.http.encoding.charset=UTF-8
+            - spring.http.encoding.enabled=true
+            - spring.http.encoding.force=true
+            - server.port=8080
         expose:
-          - 8080
+            - 8080
 
     sgeh-event-manager:
         labels:
-          - traefik.enable=true
-          - traefik.http.routers.event.entrypoints=event
-          - traefik.http.routers.event.rule=PathPrefix(`/`)
-          - traefik.http.routers.event.middlewares=cors
-          - traefik.http.services.event.loadbalancer.server.port=8080
+            - traefik.enable=true
+            - traefik.http.routers.event.entrypoints=event
+            - traefik.http.routers.event.rule=PathPrefix(`/`)
+            - traefik.http.routers.event.middlewares=cors
+            - traefik.http.services.event.loadbalancer.server.port=8080
         image: event-manager:2.0
         build:
-          context: ./event-manager
-          dockerfile: Dockerfile
-          args:
-            - APP_VERSION=${APP_VERSION}
-            - REVISION=${REVISION}
+            context: ./event-manager
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
         hostname: event-manager
         container_name: event-manager
         environment:
-          - spring.application.name=event-manager
-          - spring.jpa.hibernate.ddl-auto=update
-          - spring.jpa.show-sql=true
-          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
-          - spring.datasource.username=${DEV_USER}
-          - spring.datasource.password=${DEV_PASSWORD}
-          - spring.http.encoding.charset=UTF-8
-          - spring.http.encoding.enabled=true
-          - spring.http.encoding.force=true
-          - server.port=8080
+            - spring.application.name=event-manager
+            - spring.jpa.hibernate.ddl-auto=update
+            - spring.jpa.show-sql=true
+            - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+            - spring.datasource.username=${DEV_USER}
+            - spring.datasource.password=${DEV_PASSWORD}
+            - spring.http.encoding.charset=UTF-8
+            - spring.http.encoding.enabled=true
+            - spring.http.encoding.force=true
+            - server.port=8080
         expose:
-          - 8080
+            - 8080
 
     sgeh-auth-manager:
         labels:
-          - traefik.enable=true
-          - traefik.http.routers.auth.entrypoints=auth
-          - traefik.http.routers.auth.rule=PathPrefix(`/`)
-          - traefik.http.routers.auth.middlewares=cors
-          - traefik.http.services.auth.loadbalancer.server.port=8080
+            - traefik.enable=true
+            - traefik.http.routers.auth.entrypoints=auth
+            - traefik.http.routers.auth.rule=PathPrefix(`/`)
+            - traefik.http.routers.auth.middlewares=cors
+            - traefik.http.services.auth.loadbalancer.server.port=8080
         image: auth-manager:1.0
         build:
-          context: ./auth-manager
-          dockerfile: Dockerfile
-          args:
-            - APP_VERSION=${APP_VERSION}
-            - REVISION=${REVISION}
+            context: ./auth-manager
+            dockerfile: Dockerfile
+            args:
+                - APP_VERSION=${APP_VERSION}
+                - REVISION=${REVISION}
         hostname: auth-manager
         container_name: auth-manager
         environment:
-          - spring.application.name=auth-manager
-          - spring.jpa.hibernate.ddl-auto=update
-          - spring.jpa.show-sql=true
-          - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
-          - spring.datasource.username=${DEV_USER}
-          - spring.datasource.password=${DEV_PASSWORD}
-          - spring.http.encoding.charset=UTF-8
-          - spring.http.encoding.enabled=true
-          - spring.http.encoding.force=true
-          - jwt.rsa-private-key=classpath:certs/privateKey.pem
-          - JWT.rsa-public-key=classpath:certs/publicKey.pem
-          - spring.security.oauth2.client.registration.google.client-id=${GOOGLE_CLIENT_ID}
-          - spring.security.oauth2.client.registration.google.client-secret=${GOOGLE_CLIENT_SECRET}
-          - frontend.url=http://localhost:80
-          - server.port=8080
+            - spring.application.name=auth-manager
+            - spring.jpa.hibernate.ddl-auto=update
+            - spring.jpa.show-sql=true
+            - spring.datasource.url=jdbc:postgresql://sgeh-db:5432/sgeh
+            - spring.datasource.username=${DEV_USER}
+            - spring.datasource.password=${DEV_PASSWORD}
+            - spring.http.encoding.charset=UTF-8
+            - spring.http.encoding.enabled=true
+            - spring.http.encoding.force=true
+            - jwt.rsa-private-key=classpath:certs/privateKey.pem
+            - JWT.rsa-public-key=classpath:certs/publicKey.pem
+            - spring.security.oauth2.client.registration.google.client-id=${CLIENT_ID}
+            - spring.security.oauth2.client.registration.google.client-secret=${CLIENT_SECRET}
+            - frontend.url=http://localhost:80
+            - server.port=8080
         expose:
-          - 8080
+            - 8080
 
     sgeh-sonar-db:
         image: postgres:17
