@@ -1,6 +1,5 @@
 package edu.nus.microservice.auth_manager.config.jwtConfig;
 
-
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class JwtTokenGenerator {
 
-
     private final JwtEncoder jwtEncoder;
 
     public String generateAccessToken(Authentication authentication, UserInfoEntity userInfo) {
@@ -31,16 +29,15 @@ public class JwtTokenGenerator {
         log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
 
         String roles = getRolesOfUser(authentication);
-
         String permissions = getPermissionsFromRoles(roles);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("nus-iss")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15 , ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
-                .claim("userid",userInfo.getId())
+                .claim("userid", userInfo.getId())
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -59,7 +56,7 @@ public class JwtTokenGenerator {
             permissions.addAll(List.of("USER", "EVENT"));
         }
         if (roles.contains("ROLE_EVENT_MANAGER")) {
-            permissions.addAll(List.of( "EVENT"));
+            permissions.addAll(List.of("EVENT"));
         }
         if (roles.contains("ROLE_END_USER")) {
             permissions.add("READ");
@@ -75,7 +72,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("nus-iss")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15 , ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", "REFRESH_TOKEN")
                 .build();

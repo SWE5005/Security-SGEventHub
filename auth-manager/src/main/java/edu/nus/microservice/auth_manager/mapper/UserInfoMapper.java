@@ -19,8 +19,7 @@ public class UserInfoMapper {
   private final PasswordEncoder passwordEncoder;
 
   public UserInfoEntity mapUserRegistrationToUserInfoEntity(
-    UserRegistrationRequest userRegistrationRequest
-  ) {
+      UserRegistrationRequest userRegistrationRequest) {
     UserInfoEntity userInfoEntity = new UserInfoEntity();
     userInfoEntity.setId(UUID.randomUUID());
     userInfoEntity.setUsername(userRegistrationRequest.getUserName());
@@ -30,27 +29,25 @@ public class UserInfoMapper {
     userInfoEntity.setCreateDatetime(LocalDateTime.now());
     userInfoEntity.setActiveStatus("ACTIVE");
     userInfoEntity.setPassword(
-      passwordEncoder.encode(userRegistrationRequest.getUserPassword())
-    );
+        passwordEncoder.encode(userRegistrationRequest.getUserPassword()));
     return userInfoEntity;
   }
 
   public UserResponse convertToUserResponse(UserInfoEntity userInfo) {
     return UserResponse
-            .builder()
-            .userId(userInfo.getId())
-            .userName(userInfo.getUsername())
-            .mobileNumber(userInfo.getMobileNumber())
-            .activeStatus(userInfo.getActiveStatus())
-            .roles(userInfo.getRoles())
-            .emailAddress(userInfo.getEmailAddress())
-            .createDatetime(userInfo.getCreateDatetime())
-            .build();
+        .builder()
+        .userId(userInfo.getId())
+        .userName(userInfo.getUsername())
+        .mobileNumber(userInfo.getMobileNumber())
+        .activeStatus(userInfo.getActiveStatus())
+        .roles(userInfo.getRoles())
+        .emailAddress(userInfo.getEmailAddress())
+        .createDatetime(userInfo.getCreateDatetime())
+        .build();
   }
 
   public UserInfoEntity mapUserRequestToUserInfoEntity(
-    CreateUserRequest userRequest
-  ) {
+      CreateUserRequest userRequest) {
     UserInfoEntity userInfoEntity = new UserInfoEntity();
     userInfoEntity.setId(UUID.randomUUID());
     userInfoEntity.setUsername(userRequest.getUserName());
@@ -64,9 +61,8 @@ public class UserInfoMapper {
   }
 
   public UserInfoEntity mapGoogleUserToUserInfoEntity(
-    String email,
-    String name
-  ) {
+      String email,
+      String name) {
     UserInfoEntity userInfoEntity = new UserInfoEntity();
     userInfoEntity.setId(UUID.randomUUID());
     userInfoEntity.setUsername(name);

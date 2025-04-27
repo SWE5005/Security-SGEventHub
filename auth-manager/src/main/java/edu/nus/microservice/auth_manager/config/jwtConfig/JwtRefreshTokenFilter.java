@@ -1,6 +1,5 @@
 package edu.nus.microservice.auth_manager.config.jwtConfig;
 
-
 import edu.nus.microservice.auth_manager.config.RSAKeyRecord;
 import edu.nus.microservice.auth_manager.repository.RefreshTokenRepo;
 import edu.nus.microservice.auth_manager.utils.JwtTokenUtils;
@@ -30,20 +29,19 @@ import java.io.IOException;
 @Slf4j
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
 
-    private  final RSAKeyRecord rsaKeyRecord;
+    private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
 
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
-
 
             JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
@@ -58,20 +56,18 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
                 }
             }
 
-            if(cookieToken==null){
+            if (cookieToken == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            final String token =  cookieToken;
+            final String token = cookieToken;
             final Jwt jwtRefreshToken = jwtDecoder.decode(token);
-
 
             final String userName = jwtTokenUtils.getUserName(jwtRefreshToken);
 
-
             if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                //Check if refreshToken isPresent in database and is valid
+                // Check if refreshToken isPresent in database and is valid
                 var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshToken(jwtRefreshToken.getTokenValue())
                         .map(refreshTokenEntity -> !refreshTokenEntity.isRevoked())
                         .orElse(false);
@@ -83,8 +79,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
 
                     createdToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     securityContext.setAuthentication(createdToken);
@@ -93,9 +88,10 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             }
             log.info("[JwtRefreshTokenFilter:doFilterInternal] Completed");
             filterChain.doFilter(request, response);
-        }catch (JwtValidationException jwtValidationException){
-            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,jwtValidationException.getMessage());
+        } catch (JwtValidationException jwtValidationException) {
+            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}",
+                    jwtValidationException.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, jwtValidationException.getMessage());
         }
     }
 }
