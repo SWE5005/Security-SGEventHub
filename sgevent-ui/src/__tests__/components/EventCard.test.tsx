@@ -33,14 +33,28 @@ describe('EventCard Component', () => {
     isRegistering: false,
   };
 
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
   beforeEach(() => {
     (selectAuthSlice as jest.Mock).mockReturnValue({
       userInfo: { user_role: 'USER' },
     });
   });
 
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders event information correctly', () => {
-    render(<EventCard {...mockProps} />);
+    renderWithProvider(<EventCard {...mockProps} />);
     
     expect(screen.getByText('Test Event')).toBeInTheDocument();
     expect(screen.getByText('Test Description')).toBeInTheDocument();
@@ -50,7 +64,7 @@ describe('EventCard Component', () => {
   });
 
   it('shows admin controls when isAdmin is true', () => {
-    render(<EventCard {...mockProps} isAdmin={true} />);
+    renderWithProvider(<EventCard {...mockProps} isAdmin={true} />);
     
     const editButton = screen.getByLabelText('Edit');
     expect(editButton).toBeInTheDocument();
@@ -60,7 +74,7 @@ describe('EventCard Component', () => {
   });
 
   it('shows user controls when isAdmin is false', () => {
-    render(<EventCard {...mockProps} />);
+    renderWithProvider(<EventCard {...mockProps} />);
     
     const joinButton = screen.getByText('Join');
     expect(joinButton).toBeInTheDocument();
@@ -70,7 +84,7 @@ describe('EventCard Component', () => {
   });
 
   it('handles edit button click', () => {
-    render(<EventCard {...mockProps} isAdmin={true} />);
+    renderWithProvider(<EventCard {...mockProps} isAdmin={true} />);
     
     const editButton = screen.getByLabelText('Edit');
     fireEvent.click(editButton);
@@ -79,7 +93,7 @@ describe('EventCard Component', () => {
   });
 
   it('handles delete button click', () => {
-    render(<EventCard {...mockProps} isAdmin={true} />);
+    renderWithProvider(<EventCard {...mockProps} isAdmin={true} />);
     
     const deleteButton = screen.getByText('Delete event?');
     fireEvent.click(deleteButton);
@@ -91,7 +105,7 @@ describe('EventCard Component', () => {
   });
 
   it('handles register button click', () => {
-    render(<EventCard {...mockProps} />);
+    renderWithProvider(<EventCard {...mockProps} />);
     
     const joinButton = screen.getByText('Join');
     fireEvent.click(joinButton);
@@ -103,7 +117,7 @@ describe('EventCard Component', () => {
   });
 
   it('handles unregister button click when already registered', () => {
-    render(<EventCard {...mockProps} value={{ ...mockEvent, registered: true }} />);
+    renderWithProvider(<EventCard {...mockProps} value={{ ...mockEvent, registered: true }} />);
     
     const leaveButton = screen.getByText('Leave');
     fireEvent.click(leaveButton);
@@ -115,7 +129,7 @@ describe('EventCard Component', () => {
   });
 
   it('handles details button click', () => {
-    render(<EventCard {...mockProps} />);
+    renderWithProvider(<EventCard {...mockProps} />);
     
     const detailsButton = screen.getByText('Details');
     fireEvent.click(detailsButton);
@@ -124,14 +138,14 @@ describe('EventCard Component', () => {
   });
 
   it('shows loading state for register button', () => {
-    render(<EventCard {...mockProps} isRegistering={true} />);
+    renderWithProvider(<EventCard {...mockProps} isRegistering={true} />);
     
     const joinButton = screen.getByText('Join');
     expect(joinButton).toBeDisabled();
   });
 
   it('renders skeleton when value is null', () => {
-    render(<EventCard {...mockProps} value={null} />);
+    renderWithProvider(<EventCard {...mockProps} value={null} />);
     
     const skeletons = screen.getAllByRole('progressbar');
     expect(skeletons.length).toBeGreaterThan(0);

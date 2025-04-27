@@ -33,8 +33,22 @@ describe('EditEventForm Component', () => {
     isError: false,
   };
 
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders form fields correctly', () => {
-    render(<EditEventForm {...defaultProps} />);
+    renderWithProvider(<EditEventForm {...defaultProps} />);
     
     expect(screen.getByLabelText('Event Id')).toBeInTheDocument();
     expect(screen.getByLabelText('Title')).toBeInTheDocument();
@@ -45,23 +59,23 @@ describe('EditEventForm Component', () => {
   });
 
   it('shows event ID field only in edit mode', () => {
-    render(<EditEventForm {...defaultProps} type="edit" />);
+    renderWithProvider(<EditEventForm {...defaultProps} type="edit" />);
     expect(screen.getByLabelText('Event Id')).toBeInTheDocument();
 
-    render(<EditEventForm {...defaultProps} type="add" />);
+    renderWithProvider(<EditEventForm {...defaultProps} type="add" />);
     expect(screen.queryByLabelText('Event Id')).not.toBeInTheDocument();
   });
 
   it('shows member list only in view mode', () => {
-    render(<EditEventForm {...defaultProps} type="view" />);
+    renderWithProvider(<EditEventForm {...defaultProps} type="view" />);
     expect(screen.getByText('Event Member List')).toBeInTheDocument();
 
-    render(<EditEventForm {...defaultProps} type="edit" />);
+    renderWithProvider(<EditEventForm {...defaultProps} type="edit" />);
     expect(screen.queryByText('Event Member List')).not.toBeInTheDocument();
   });
 
   it('handles form submission', () => {
-    render(<EditEventForm {...defaultProps} />);
+    renderWithProvider(<EditEventForm {...defaultProps} />);
     
     const submitButton = screen.getByText('Submit');
     fireEvent.click(submitButton);
@@ -70,20 +84,20 @@ describe('EditEventForm Component', () => {
   });
 
   it('shows loading state during submission', () => {
-    render(<EditEventForm {...defaultProps} isUpdating={true} />);
+    renderWithProvider(<EditEventForm {...defaultProps} isUpdating={true} />);
     
     const submitButton = screen.getByText('Submit');
     expect(submitButton).toBeDisabled();
   });
 
   it('shows error message when isError is true', () => {
-    render(<EditEventForm {...defaultProps} isError={true} />);
+    renderWithProvider(<EditEventForm {...defaultProps} isError={true} />);
     
     expect(screen.getByText('Something went wrong while adding/updating event, Please try again later.')).toBeInTheDocument();
   });
 
   it('navigates back to events page', () => {
-    render(<EditEventForm {...defaultProps} />);
+    renderWithProvider(<EditEventForm {...defaultProps} />);
     
     const backButton = screen.getByText('Back to Event Home');
     fireEvent.click(backButton);
@@ -92,7 +106,7 @@ describe('EditEventForm Component', () => {
   });
 
   it('updates form fields correctly', () => {
-    render(<EditEventForm {...defaultProps} />);
+    renderWithProvider(<EditEventForm {...defaultProps} />);
     
     const titleInput = screen.getByLabelText('Title');
     fireEvent.change(titleInput, { target: { value: 'New Title' } });
@@ -111,7 +125,7 @@ describe('EditEventForm Component', () => {
   });
 
   it('disables form fields in view mode', () => {
-    render(<EditEventForm {...defaultProps} type="view" />);
+    renderWithProvider(<EditEventForm {...defaultProps} type="view" />);
     
     const titleInput = screen.getByLabelText('Title');
     expect(titleInput).toBeDisabled();
@@ -121,7 +135,7 @@ describe('EditEventForm Component', () => {
   });
 
   it('handles file upload', () => {
-    render(<EditEventForm {...defaultProps} />);
+    renderWithProvider(<EditEventForm {...defaultProps} />);
     
     const fileInput = screen.getByLabelText('Event Cover');
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
@@ -131,5 +145,33 @@ describe('EditEventForm Component', () => {
     fireEvent.click(submitButton);
     
     expect(defaultProps.onSubmit).toHaveBeenCalled();
+  });
+
+  it('renders form with initial values', () => {
+    renderWithProvider(<EditEventForm {...defaultProps} />);
+    
+    expect(screen.getByLabelText('Title')).toHaveValue('Test Event');
+    expect(screen.getByLabelText('Description')).toHaveValue('Test Description');
+    expect(screen.getByLabelText('Start Date')).toHaveValue('2024-04-01T10:00');
+    expect(screen.getByLabelText('Capacity')).toHaveValue(10);
+    expect(screen.getByLabelText('Location')).toHaveValue('Test Location');
+  });
+
+  it('handles input changes', () => {
+    renderWithProvider(<EditEventForm {...defaultProps} />);
+    
+    const titleInput = screen.getByLabelText('Title');
+    fireEvent.change(titleInput, { target: { value: 'Updated Title' } });
+    
+    expect(titleInput).toHaveValue('Updated Title');
+  });
+
+  it('validates required fields', () => {
+    renderWithProvider(<EditEventForm {...defaultProps} value={{ ...defaultProps.value, title: '' }} />);
+    
+    const submitButton = screen.getByText('Submit');
+    fireEvent.click(submitButton);
+    
+    expect(screen.getByText('Title is required')).toBeInTheDocument();
   });
 }); 

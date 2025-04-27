@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import FileUploader from '../../components/FileUploader';
 import { toBase64 } from '../../utils';
 
@@ -16,20 +18,34 @@ describe('FileUploader Component', () => {
     disabled: false,
   };
 
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
   beforeEach(() => {
     (toBase64 as jest.Mock).mockImplementation((file, callback) => {
       callback('data:image/jpeg;base64,test');
     });
   });
 
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders upload button with label', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     expect(screen.getByText('Upload Image')).toBeInTheDocument();
   });
 
   it('handles file upload', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
     const input = screen.getByLabelText('Upload Image');
@@ -41,28 +57,28 @@ describe('FileUploader Component', () => {
   });
 
   it('disables upload button when disabled prop is true', () => {
-    render(<FileUploader {...defaultProps} disabled={true} />);
+    renderWithProvider(<FileUploader {...defaultProps} disabled={true} />);
     
     const input = screen.getByLabelText('Upload Image');
     expect(input).toBeDisabled();
   });
 
   it('displays uploaded image', () => {
-    render(<FileUploader {...defaultProps} value="data:image/jpeg;base64,test" />);
+    renderWithProvider(<FileUploader {...defaultProps} value="data:image/jpeg;base64,test" />);
     
     const image = screen.getByRole('img');
     expect(image).toHaveAttribute('src', 'data:image/jpeg;base64,test');
   });
 
   it('accepts only image files', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const input = screen.getByLabelText('Upload Image');
     expect(input).toHaveAttribute('accept', 'image/png, image/jpeg');
   });
 
   it('clears file input after upload', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
     const input = screen.getByLabelText('Upload Image');
@@ -73,16 +89,20 @@ describe('FileUploader Component', () => {
   });
 
   it('updates image when value prop changes', () => {
-    const { rerender } = render(<FileUploader {...defaultProps} />);
+    const { rerender } = renderWithProvider(<FileUploader {...defaultProps} />);
     
-    rerender(<FileUploader {...defaultProps} value="new-image-data" />);
+    rerender(
+      <Provider store={mockStore}>
+        <FileUploader {...defaultProps} value="new-image-data" />
+      </Provider>
+    );
     
     const image = screen.getByRole('img');
     expect(image).toHaveAttribute('src', 'new-image-data');
   });
 
   it('handles empty file selection', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const input = screen.getByLabelText('Upload Image');
     fireEvent.change(input, { target: { files: [] } });
@@ -92,7 +112,7 @@ describe('FileUploader Component', () => {
   });
 
   it('handles multiple file selection', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const file1 = new File(['test1'], 'test1.jpg', { type: 'image/jpeg' });
     const file2 = new File(['test2'], 'test2.jpg', { type: 'image/jpeg' });
@@ -105,11 +125,14 @@ describe('FileUploader Component', () => {
   });
 
   it('handles file upload error', () => {
+    const mockErrorCallback = jest.fn();
     (toBase64 as jest.Mock).mockImplementation((file, callback, errorCallback) => {
-      errorCallback(new Error('Upload failed'));
+      if (errorCallback) {
+        errorCallback(new Error('Upload failed'));
+      }
     });
 
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
     const input = screen.getByLabelText('Upload Image');
@@ -120,7 +143,7 @@ describe('FileUploader Component', () => {
   });
 
   it('handles invalid file type', () => {
-    render(<FileUploader {...defaultProps} />);
+    renderWithProvider(<FileUploader {...defaultProps} />);
     
     const file = new File(['test'], 'test.txt', { type: 'text/plain' });
     const input = screen.getByLabelText('Upload Image');

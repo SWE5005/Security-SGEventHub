@@ -27,6 +27,12 @@ describe('Header Component', () => {
   const mockUseLogoutMutation = useLogoutMutation as jest.Mock;
   const mockSelectUserName = selectUserName as jest.Mock;
 
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
   beforeEach(() => {
     mockUseLogoutMutation.mockReturnValue([
       mockLogout,
@@ -36,28 +42,36 @@ describe('Header Component', () => {
     mockSelectUserName.mockReturnValue('Test User');
   });
 
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders header with title', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     expect(screen.getByText('SG EventHub')).toBeInTheDocument();
   });
 
   it('renders home button', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const homeButton = screen.getByLabelText('go to home');
     expect(homeButton).toBeInTheDocument();
   });
 
   it('renders account menu button', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     expect(accountButton).toBeInTheDocument();
   });
 
   it('navigates to home when home button is clicked', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const homeButton = screen.getByLabelText('go to home');
     fireEvent.click(homeButton);
@@ -66,7 +80,7 @@ describe('Header Component', () => {
   });
 
   it('opens account menu when account button is clicked', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -77,7 +91,7 @@ describe('Header Component', () => {
   });
 
   it('closes account menu when clicking outside', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -93,7 +107,7 @@ describe('Header Component', () => {
       { isSuccess: true, isLoading: false },
     ]);
 
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -113,7 +127,7 @@ describe('Header Component', () => {
       { isSuccess: false, isLoading: true },
     ]);
 
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -127,7 +141,7 @@ describe('Header Component', () => {
   it('shows profile when username is not available', () => {
     mockSelectUserName.mockReturnValue(null);
 
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -136,7 +150,7 @@ describe('Header Component', () => {
   });
 
   it('closes menu when clicking menu item', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -153,7 +167,7 @@ describe('Header Component', () => {
       { isSuccess: false, isLoading: false, error: new Error('Logout failed') },
     ]);
 
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);
@@ -168,7 +182,7 @@ describe('Header Component', () => {
   });
 
   it('handles menu item click with navigation', () => {
-    render(<Header />);
+    renderWithProvider(<Header />);
     
     const accountButton = screen.getByLabelText('account of current user');
     fireEvent.click(accountButton);

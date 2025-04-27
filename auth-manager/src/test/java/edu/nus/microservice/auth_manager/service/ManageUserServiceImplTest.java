@@ -4,16 +4,15 @@ import edu.nus.microservice.auth_manager.dto.CreateUserRequest;
 import edu.nus.microservice.auth_manager.dto.ManageUserRequest;
 import edu.nus.microservice.auth_manager.dto.UserResponse;
 import edu.nus.microservice.auth_manager.entity.UserInfoEntity;
-import edu.nus.microservice.auth_manager.repository.UserInfoRepository;
+import edu.nus.microservice.auth_manager.mapper.UserInfoMapper;
+import edu.nus.microservice.auth_manager.repository.UserRepository;
 import edu.nus.microservice.auth_manager.service.impl.ManageUserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,128 +25,226 @@ import static org.mockito.Mockito.*;
 class ManageUserServiceImplTest {
 
     @Mock
-    private UserInfoRepository userInfoRepository;
+    private UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    private UserInfoMapper userInfoMapper;
 
     @InjectMocks
     private ManageUserServiceImpl manageUserService;
 
-    private UserInfoEntity mockUser;
-    private CreateUserRequest createUserRequest;
-    private ManageUserRequest manageUserRequest;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        
-        // Setup mock user
-        mockUser = UserInfoEntity.builder()
-                .id(UUID.randomUUID())
-                .username("testUser")
-                .password("encodedPassword")
-                .emailAddress("test@example.com")
-                .activeStatus("ACTIVE")
-                .mobileNumber("1234567890")
-                .roles("USER")
-                .createDatetime(LocalDateTime.now())
+    }
+
+    @Test
+    void getAllUsers_Success() {
+        // Arrange
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        UserInfoEntity user1 = UserInfoEntity.builder()
+                .id(userId1)
+                .username("user1")
+                .emailAddress("user1@example.com")
+                .build();
+        UserInfoEntity user2 = UserInfoEntity.builder()
+                .id(userId2)
+                .username("user2")
+                .emailAddress("user2@example.com")
                 .build();
 
-        // Setup create user request
-        createUserRequest = new CreateUserRequest();
-        createUserRequest.setUsername("newUser");
-        createUserRequest.setPassword("password123");
-        createUserRequest.setEmailAddress("new@example.com");
-        createUserRequest.setMobileNumber("9876543210");
-        createUserRequest.setRoles("USER");
+        UserResponse response1 = UserResponse.builder()
+                .userId(userId1)
+                .userName(user1.getUsername())
+                .emailAddress(user1.getEmailAddress())
+                .build();
+        UserResponse response2 = UserResponse.builder()
+                .userId(userId2)
+                .userName(user2.getUsername())
+                .emailAddress(user2.getEmailAddress())
+                .build();
 
-        // Setup manage user request
-        manageUserRequest = new ManageUserRequest();
-        manageUserRequest.setUserId(mockUser.getId().toString());
-        manageUserRequest.setUsername("updatedUser");
-        manageUserRequest.setEmailAddress("updated@example.com");
-        manageUserRequest.setMobileNumber("5555555555");
-        manageUserRequest.setRoles("ADMIN");
-    }
+        when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+        when(userInfoMapper.convertToUserResponse(user1)).thenReturn(response1);
+        when(userInfoMapper.convertToUserResponse(user2)).thenReturn(response2);
 
-    @Test
-    void getAllUsers_ShouldReturnListOfUsers() {
-        when(userInfoRepository.findAll()).thenReturn(Arrays.asList(mockUser));
-
+        // Act
         List<UserResponse> result = manageUserService.getAllUsers();
 
+        // Assert
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(mockUser.getUsername(), result.get(0).getUsername());
-        verify(userInfoRepository, times(1)).findAll();
+        assertEquals(2, result.size());
+        assertEquals(userId1, result.get(0).getUserId());
+        assertEquals(userId2, result.get(1).getUserId());
     }
 
     @Test
-    void getUserDetails_ShouldReturnUserWhenExists() {
-        when(userInfoRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
+    void createUser_Success() {
+        // Arrange
+        CreateUserRequest request = CreateUserRequest.builder()
+                .userName("newuser")
+                .emailAddress("newuser@example.com")
+                .mobileNumber("1234567890")
+                .build();
 
-        UserResponse result = manageUserService.getUserDetails(mockUser.getId().toString());
+        UUID userId = UUID.randomUUID();
+        UserInfoEntity userEntity = UserInfoEntity.builder()
+                .id(userId)
+                .username(request.getUserName())
+                .emailAddress(request.getEmailAddress())
+                .build();
 
+        UserResponse expectedResponse = UserResponse.builder()
+                .userId(userId)
+                .userName(userEntity.getUsername())
+                .emailAddress(userEntity.getEmailAddress())
+                .build();
+
+        when(userInfoMapper.mapUserRequestToUserInfoEntity(request)).thenReturn(userEntity);
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
+        when(userInfoMapper.convertToUserResponse(userEntity)).thenReturn(expectedResponse);
+
+        // Act
+        UserResponse result = manageUserService.createUser(request);
+
+        // Assert
         assertNotNull(result);
-        assertEquals(mockUser.getUsername(), result.getUsername());
-        verify(userInfoRepository, times(1)).findById(any(UUID.class));
+        assertEquals(userId, result.getUserId());
+        assertEquals(userEntity.getUsername(), result.getUserName());
+        assertEquals(userEntity.getEmailAddress(), result.getEmailAddress());
     }
 
     @Test
-    void getUserDetails_ShouldThrowExceptionWhenUserNotFound() {
-        when(userInfoRepository.findById(any(UUID.class))).thenReturn(Optional.empty());
+    void getUserDetails_Success() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        UserInfoEntity userEntity = UserInfoEntity.builder()
+                .id(userId)
+                .username("testuser")
+                .emailAddress("test@example.com")
+                .roles("USER")
+                .build();
 
-        assertThrows(RuntimeException.class, () -> 
-            manageUserService.getUserDetails(mockUser.getId().toString())
-        );
+        UserResponse expectedResponse = UserResponse.builder()
+                .userId(userId)
+                .userName(userEntity.getUsername())
+                .emailAddress(userEntity.getEmailAddress())
+                .roles(userEntity.getRoles())
+                .build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(userEntity));
+        when(userInfoMapper.convertToUserResponse(userEntity)).thenReturn(expectedResponse);
+
+        // Act
+        UserResponse result = manageUserService.getUserDetails(userId.toString());
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(userId, result.getUserId());
+        assertEquals(userEntity.getUsername(), result.getUserName());
+        assertEquals(userEntity.getEmailAddress(), result.getEmailAddress());
+        assertEquals(userEntity.getRoles(), result.getRoles());
     }
 
     @Test
-    void findByEmail_ShouldReturnUserWhenExists() {
-        when(userInfoRepository.findByEmailAddress(anyString())).thenReturn(Optional.of(mockUser));
+    void getUserDetails_UserNotFound() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        Optional<UserInfoEntity> result = manageUserService.findByEmail(mockUser.getEmailAddress());
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> manageUserService.getUserDetails(userId.toString()));
+    }
 
+    @Test
+    void findByEmail_Success() {
+        // Arrange
+        String email = "test@example.com";
+        UserInfoEntity userEntity = UserInfoEntity.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .emailAddress(email)
+                .build();
+
+        when(userRepository.findByEmailAddress(email)).thenReturn(Optional.of(userEntity));
+
+        // Act
+        Optional<UserInfoEntity> result = manageUserService.findByEmail(email);
+
+        // Assert
         assertTrue(result.isPresent());
-        assertEquals(mockUser.getEmailAddress(), result.get().getEmailAddress());
-        verify(userInfoRepository, times(1)).findByEmailAddress(anyString());
+        assertEquals(email, result.get().getEmailAddress());
     }
 
     @Test
-    void createUser_ShouldCreateNewUser() {
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(userInfoRepository.save(any(UserInfoEntity.class))).thenReturn(mockUser);
+    void saveUser_Success() {
+        // Arrange
+        UserInfoEntity userEntity = UserInfoEntity.builder()
+                .id(UUID.randomUUID())
+                .username("testuser")
+                .emailAddress("test@example.com")
+                .build();
 
-        UserResponse result = manageUserService.createUser(createUserRequest);
+        when(userRepository.save(userEntity)).thenReturn(userEntity);
 
-        assertNotNull(result);
-        assertEquals(createUserRequest.getUsername(), result.getUsername());
-        verify(passwordEncoder, times(1)).encode(anyString());
-        verify(userInfoRepository, times(1)).save(any(UserInfoEntity.class));
+        // Act & Assert
+        assertDoesNotThrow(() -> manageUserService.saveUser(userEntity));
+        verify(userRepository).save(userEntity);
     }
 
     @Test
-    void updateUser_ShouldUpdateExistingUser() {
-        when(userInfoRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
-        when(userInfoRepository.save(any(UserInfoEntity.class))).thenReturn(mockUser);
+    void updateUser_Success() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        ManageUserRequest request = ManageUserRequest.builder()
+                .userId(userId.toString())
+                .userName("updateduser")
+                .mobileNumber("1234567890")
+                .roles("ADMIN")
+                .activeStatus("true")
+                .build();
 
-        String result = manageUserService.updateUser(manageUserRequest);
+        when(userRepository.updateUser(userId, request.getUserName(), request.getMobileNumber(), 
+                request.getRoles(), request.getActiveStatus())).thenReturn(1);
 
-        assertNotNull(result);
-        assertEquals(mockUser.getId().toString(), result);
-        verify(userInfoRepository, times(1)).findById(any(UUID.class));
-        verify(userInfoRepository, times(1)).save(any(UserInfoEntity.class));
+        // Act
+        String result = manageUserService.updateUser(request);
+
+        // Assert
+        assertEquals("Update user successfully.", result);
     }
 
     @Test
-    void deleteUser_ShouldDeleteExistingUser() {
-        when(userInfoRepository.findById(any(UUID.class))).thenReturn(Optional.of(mockUser));
-        doNothing().when(userInfoRepository).deleteById(any(UUID.class));
+    void updateUser_Failure() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        ManageUserRequest request = ManageUserRequest.builder()
+                .userId(userId.toString())
+                .userName("updateduser")
+                .mobileNumber("1234567890")
+                .roles("ADMIN")
+                .activeStatus("true")
+                .build();
 
-        manageUserService.deleteUser(mockUser.getId().toString());
+        when(userRepository.updateUser(userId, request.getUserName(), request.getMobileNumber(), 
+                request.getRoles(), request.getActiveStatus())).thenReturn(0);
 
-        verify(userInfoRepository, times(1)).findById(any(UUID.class));
-        verify(userInfoRepository, times(1)).deleteById(any(UUID.class));
+        // Act
+        String result = manageUserService.updateUser(request);
+
+        // Assert
+        assertEquals("Failed to update user.", result);
+    }
+
+    @Test
+    void deleteUser_Success() {
+        // Arrange
+        UUID userId = UUID.randomUUID();
+        doNothing().when(userRepository).deleteById(userId);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> manageUserService.deleteUser(userId.toString()));
+        verify(userRepository).deleteById(userId);
     }
 } 

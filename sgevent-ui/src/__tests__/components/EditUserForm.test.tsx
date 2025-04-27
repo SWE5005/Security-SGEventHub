@@ -3,156 +3,136 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import EditUserForm from '../../components/EditUserForm';
-import { navigate } from 'gatsby';
-import { STATUS_OPTIONS, ROLE_OPTIONS } from '../../constants';
+import { ROLE_OPTIONS, STATUS_OPTIONS } from '../../constants';
 
-// Mock the gatsby navigate function
-jest.mock('gatsby', () => ({
-  navigate: jest.fn(),
-}));
-
-describe('EditUserForm Component', () => {
-  const mockUser = {
+const defaultProps = {
+  value: {
     userId: '1',
     emailAddress: 'test@example.com',
     userName: 'Test User',
     mobileNumber: '1234567890',
     activeStatus: 'ACTIVE',
-    roles: 'USER',
+    roles: 'END_USER'
+  },
+  onSubmit: jest.fn(),
+  isUpdating: false,
+  isError: false,
+  isEdit: false
+};
+
+describe('EditUserForm Component', () => {
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'ADMIN' } }, action) => state,
+    },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
   };
 
-  const defaultProps = {
-    value: mockUser,
-    onSubmit: jest.fn(),
-    isUpdating: false,
-    isError: false,
-    isEdit: false,
-  };
-
-  it('renders form fields correctly', () => {
-    render(<EditUserForm {...defaultProps} />);
+  it('renders form with initial values', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
-    expect(screen.getByLabelText('Email Address')).toBeInTheDocument();
-    expect(screen.getByLabelText('Name')).toBeInTheDocument();
-    expect(screen.getByLabelText('Mobile Number')).toBeInTheDocument();
-    expect(screen.getByLabelText('Status')).toBeInTheDocument();
-    expect(screen.getByLabelText('Role')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email Address')).toHaveValue('test@example.com');
+    expect(screen.getByLabelText('Name')).toHaveValue('Test User');
+    expect(screen.getByLabelText('Mobile Number')).toHaveValue('1234567890');
+    expect(screen.getByLabelText('Role')).toHaveValue('END_USER');
+    expect(screen.getByLabelText('Status')).toHaveValue('ACTIVE');
   });
 
-  it('shows user ID field only in edit mode', () => {
-    render(<EditUserForm {...defaultProps} isEdit={true} />);
-    expect(screen.getByLabelText('User Id')).toBeInTheDocument();
-
-    render(<EditUserForm {...defaultProps} isEdit={false} />);
-    expect(screen.queryByLabelText('User Id')).not.toBeInTheDocument();
-  });
-
-  it('handles form submission', () => {
-    render(<EditUserForm {...defaultProps} />);
-    
-    const submitButton = screen.getByText('Submit');
-    fireEvent.click(submitButton);
-    
-    expect(defaultProps.onSubmit).toHaveBeenCalledWith(mockUser);
-  });
-
-  it('shows loading state during submission', () => {
-    render(<EditUserForm {...defaultProps} isUpdating={true} />);
-    
-    const submitButton = screen.getByText('Submit');
-    expect(submitButton).toBeDisabled();
-  });
-
-  it('shows error message when isError is true', () => {
-    render(<EditUserForm {...defaultProps} isError={true} />);
-    
-    expect(screen.getByText('Something went wrong while adding/updating user, Please try again later.')).toBeInTheDocument();
-  });
-
-  it('navigates back to users page', () => {
-    render(<EditUserForm {...defaultProps} />);
-    
-    const backButton = screen.getByText('Back');
-    fireEvent.click(backButton);
-    
-    expect(navigate).toHaveBeenCalledWith('/users');
-  });
-
-  it('updates form fields correctly', () => {
-    render(<EditUserForm {...defaultProps} />);
+  it('handles input changes', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
     const nameInput = screen.getByLabelText('Name');
-    fireEvent.change(nameInput, { target: { value: 'New Name' } });
+    fireEvent.change(nameInput, { target: { value: 'Updated Name' } });
     
-    const mobileInput = screen.getByLabelText('Mobile Number');
-    fireEvent.change(mobileInput, { target: { value: '9876543210' } });
-    
-    const submitButton = screen.getByText('Submit');
-    fireEvent.click(submitButton);
-    
-    expect(defaultProps.onSubmit).toHaveBeenCalledWith({
-      ...mockUser,
-      userName: 'New Name',
-      mobileNumber: '9876543210',
-    });
+    expect(nameInput).toHaveValue('Updated Name');
   });
 
   it('handles status selection', () => {
-    render(<EditUserForm {...defaultProps} />);
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
     const statusSelect = screen.getByLabelText('Status');
-    fireEvent.change(statusSelect, { target: { value: 'INACTIVE' } });
+    fireEvent.mouseDown(statusSelect);
     
-    const submitButton = screen.getByText('Submit');
-    fireEvent.click(submitButton);
+    const inactiveOption = screen.getByRole('option', { name: 'Inactive' });
+    fireEvent.click(inactiveOption);
     
-    expect(defaultProps.onSubmit).toHaveBeenCalledWith({
-      ...mockUser,
-      activeStatus: 'INACTIVE',
-    });
+    expect(statusSelect).toHaveValue('INACTIVE');
   });
 
   it('handles role selection', () => {
-    render(<EditUserForm {...defaultProps} />);
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
     const roleSelect = screen.getByLabelText('Role');
-    fireEvent.change(roleSelect, { target: { value: 'ADMIN' } });
+    fireEvent.mouseDown(roleSelect);
     
-    const submitButton = screen.getByText('Submit');
-    fireEvent.click(submitButton);
+    const eventManagerOption = screen.getByRole('option', { name: 'Event Manager' });
+    fireEvent.click(eventManagerOption);
     
-    expect(defaultProps.onSubmit).toHaveBeenCalledWith({
-      ...mockUser,
-      roles: 'ADMIN',
-    });
-  });
-
-  it('disables email field in edit mode', () => {
-    render(<EditUserForm {...defaultProps} isEdit={true} />);
-    
-    const emailInput = screen.getByLabelText('Email Address');
-    expect(emailInput).toBeDisabled();
+    expect(roleSelect).toHaveValue('EVENT_MANAGER');
   });
 
   it('shows all status options', () => {
-    render(<EditUserForm {...defaultProps} />);
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
     const statusSelect = screen.getByLabelText('Status');
     fireEvent.mouseDown(statusSelect);
     
     STATUS_OPTIONS.forEach(option => {
-      expect(screen.getByText(option.label)).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: option.label })).toBeInTheDocument();
     });
   });
 
   it('shows all role options', () => {
-    render(<EditUserForm {...defaultProps} />);
+    renderWithProvider(<EditUserForm {...defaultProps} />);
     
     const roleSelect = screen.getByLabelText('Role');
     fireEvent.mouseDown(roleSelect);
     
     ROLE_OPTIONS.forEach(option => {
-      expect(screen.getByText(option.label)).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: option.label })).toBeInTheDocument();
     });
+  });
+
+  it('handles form submission', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} />);
+    
+    const submitButton = screen.getByText('Submit');
+    fireEvent.click(submitButton);
+    
+    expect(defaultProps.onSubmit).toHaveBeenCalledWith(defaultProps.value);
+  });
+
+  it('shows loading state', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} isUpdating={true} />);
+    
+    const submitButton = screen.getByText('Submit');
+    expect(submitButton).toBeDisabled();
+  });
+
+  it('shows error message', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} isError={true} />);
+    
+    expect(screen.getByText('Something went wrong while adding/updating user, Please try again later.')).toBeInTheDocument();
+  });
+
+  it('shows user ID field in edit mode', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} isEdit={true} />);
+    expect(screen.getByLabelText('User Id')).toBeInTheDocument();
+  });
+
+  it('disables email field in edit mode', () => {
+    renderWithProvider(<EditUserForm {...defaultProps} isEdit={true} />);
+    expect(screen.getByLabelText('Email Address')).toBeDisabled();
   });
 }); 

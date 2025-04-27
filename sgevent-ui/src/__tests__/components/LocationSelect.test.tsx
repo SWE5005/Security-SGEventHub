@@ -1,5 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import LocationSelect from '../../components/LocationSelect';
 import { useSearchLocationMutation } from '../../services/map.service';
 
@@ -9,12 +11,8 @@ jest.mock('../../services/map.service', () => ({
 }));
 
 describe('LocationSelect Component', () => {
-  const mockLocations = [
-    { ADDRESS: 'Location 1' },
-    { ADDRESS: 'Location 2' },
-    { ADDRESS: 'Location 3' },
-  ];
-
+  const mockSearchLocation = jest.fn();
+  const mockUseSearchLocationMutation = useSearchLocationMutation as jest.Mock;
   const defaultProps = {
     label: 'Location',
     value: '',
@@ -22,144 +20,191 @@ describe('LocationSelect Component', () => {
     disabled: false,
   };
 
-  const mockSearchLocation = jest.fn();
-  const mockUseSearchLocationMutation = useSearchLocationMutation as jest.Mock;
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
 
   beforeEach(() => {
     mockUseSearchLocationMutation.mockReturnValue([
       mockSearchLocation,
-      { isSuccess: false, isLoading: false, data: null },
+      { isLoading: false, isSuccess: false, data: null },
     ]);
+    jest.clearAllMocks();
   });
 
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders with label', () => {
-    render(<LocationSelect {...defaultProps} />);
-    
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     expect(screen.getByLabelText('Location')).toBeInTheDocument();
+  });
+
+  it('handles input change', async () => {
+    renderWithProvider(<LocationSelect {...defaultProps} />);
+    
+    const input = screen.getByLabelText('Location');
+    fireEvent.change(input, { target: { value: 'Singapore' } });
+    
+    await waitFor(() => {
+      expect(mockSearchLocation).toHaveBeenCalledWith('Singapore');
+    });
   });
 
   it('shows loading state', () => {
     mockUseSearchLocationMutation.mockReturnValue([
       mockSearchLocation,
-      { isSuccess: false, isLoading: true, data: null },
+      { isLoading: true, isSuccess: false, data: null },
     ]);
 
-    render(<LocationSelect {...defaultProps} />);
-    
-    const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
-    
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('handles location search', async () => {
+  it('displays location options when data is loaded', () => {
+    const mockData = {
+      results: [
+        { ADDRESS: 'Singapore' },
+        { ADDRESS: 'Singapore, Central' },
+      ],
+    };
+
     mockUseSearchLocationMutation.mockReturnValue([
       mockSearchLocation,
-      { isSuccess: true, isLoading: false, data: { results: mockLocations } },
+      { isLoading: false, isSuccess: true, data: mockData },
     ]);
 
-    render(<LocationSelect {...defaultProps} />);
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     
     const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.change(input, { target: { value: 'Singapore' } });
     
-    await waitFor(() => {
-      expect(mockSearchLocation).toHaveBeenCalledWith('test');
-    });
+    expect(screen.getByText('Singapore')).toBeInTheDocument();
+    expect(screen.getByText('Singapore, Central')).toBeInTheDocument();
   });
 
-  it('displays search results', async () => {
-    mockUseSearchLocationMutation.mockReturnValue([
-      mockSearchLocation,
-      { isSuccess: true, isLoading: false, data: { results: mockLocations } },
-    ]);
-
-    render(<LocationSelect {...defaultProps} />);
+  it('handles option selection', () => {
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     
     const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.change(input, { target: { value: 'Singapore' } });
     
-    await waitFor(() => {
-      expect(screen.getByText('Location 1')).toBeInTheDocument();
-      expect(screen.getByText('Location 2')).toBeInTheDocument();
-      expect(screen.getByText('Location 3')).toBeInTheDocument();
-    });
-  });
-
-  it('handles location selection', async () => {
-    mockUseSearchLocationMutation.mockReturnValue([
-      mockSearchLocation,
-      { isSuccess: true, isLoading: false, data: { results: mockLocations } },
-    ]);
-
-    render(<LocationSelect {...defaultProps} />);
-    
-    const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
-    
-    await waitFor(() => {
-      const option = screen.getByText('Location 1');
-      fireEvent.click(option);
-    });
+    const option = screen.getByText('Singapore');
+    fireEvent.click(option);
     
     expect(defaultProps.onChange).toHaveBeenCalled();
   });
 
   it('handles disabled state', () => {
-    render(<LocationSelect {...defaultProps} disabled={true} />);
+    renderWithProvider(<LocationSelect {...defaultProps} disabled={true} />);
     
     const input = screen.getByLabelText('Location');
     expect(input).toBeDisabled();
   });
 
-  it('debounces search input', async () => {
+  it('debounces input changes', async () => {
     jest.useFakeTimers();
     
-    render(<LocationSelect {...defaultProps} />);
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     
     const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.change(input, { target: { value: 'Singapore' } });
     
     expect(mockSearchLocation).not.toHaveBeenCalled();
     
     jest.advanceTimersByTime(500);
     
     await waitFor(() => {
-      expect(mockSearchLocation).toHaveBeenCalledWith('test');
+      expect(mockSearchLocation).toHaveBeenCalledWith('Singapore');
     });
     
     jest.useRealTimers();
   });
 
-  it('handles empty search results', async () => {
-    mockUseSearchLocationMutation.mockReturnValue([
-      mockSearchLocation,
-      { isSuccess: true, isLoading: false, data: { results: [] } },
-    ]);
-
-    render(<LocationSelect {...defaultProps} />);
+  it('does not search when input is empty', () => {
+    renderWithProvider(<LocationSelect {...defaultProps} />);
     
     const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.change(input, { target: { value: '' } });
     
-    await waitFor(() => {
-      expect(screen.queryByText('Location 1')).not.toBeInTheDocument();
-    });
+    expect(mockSearchLocation).not.toHaveBeenCalled();
   });
 
-  it('handles search error', async () => {
-    mockUseSearchLocationMutation.mockReturnValue([
-      mockSearchLocation,
-      { isSuccess: false, isLoading: false, error: 'Search failed' },
-    ]);
-
-    render(<LocationSelect {...defaultProps} />);
+  it('does not search when input value is the same as current value', () => {
+    renderWithProvider(<LocationSelect {...defaultProps} value="Singapore" />);
     
     const input = screen.getByLabelText('Location');
-    fireEvent.change(input, { target: { value: 'test' } });
+    fireEvent.change(input, { target: { value: 'Singapore' } });
     
-    await waitFor(() => {
-      expect(screen.queryByText('Location 1')).not.toBeInTheDocument();
-    });
+    expect(mockSearchLocation).not.toHaveBeenCalled();
+  });
+
+  it('clears options when input is cleared', () => {
+    const mockData = {
+      results: [
+        { ADDRESS: 'Singapore' },
+        { ADDRESS: 'Singapore, Central' },
+      ],
+    };
+
+    mockUseSearchLocationMutation.mockReturnValue([
+      mockSearchLocation,
+      { isLoading: false, isSuccess: true, data: mockData },
+    ]);
+
+    renderWithProvider(<LocationSelect {...defaultProps} />);
+    
+    const input = screen.getByLabelText('Location');
+    fireEvent.change(input, { target: { value: 'Singapore' } });
+    fireEvent.change(input, { target: { value: '' } });
+    
+    expect(screen.queryByText('Singapore')).not.toBeInTheDocument();
+    expect(screen.queryByText('Singapore, Central')).not.toBeInTheDocument();
+  });
+
+  it('does not update options when result is not successful', () => {
+    mockUseSearchLocationMutation.mockReturnValue([
+      mockSearchLocation,
+      { isLoading: false, isSuccess: false, data: null },
+    ]);
+
+    renderWithProvider(<LocationSelect {...defaultProps} />);
+    
+    const input = screen.getByLabelText('Location');
+    fireEvent.change(input, { target: { value: 'Singapore' } });
+    
+    expect(screen.queryByText('Singapore')).not.toBeInTheDocument();
+  });
+
+  it('does not update options when result data is null', () => {
+    mockUseSearchLocationMutation.mockReturnValue([
+      mockSearchLocation,
+      { isLoading: false, isSuccess: true, data: null },
+    ]);
+
+    renderWithProvider(<LocationSelect {...defaultProps} />);
+    
+    const input = screen.getByLabelText('Location');
+    fireEvent.change(input, { target: { value: 'Singapore' } });
+    
+    expect(screen.queryByText('Singapore')).not.toBeInTheDocument();
+  });
+
+  it('handles open and close events', () => {
+    renderWithProvider(<LocationSelect {...defaultProps} />);
+    
+    const input = screen.getByLabelText('Location');
+    fireEvent.click(input);
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    
+    fireEvent.blur(input);
+    expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 }); 

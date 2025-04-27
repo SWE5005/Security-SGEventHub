@@ -25,12 +25,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
-
 @RequiredArgsConstructor
 @Transactional
 @Service
 @Slf4j
-public class AuthServiceImpl implements  AuthService {
+public class AuthServiceImpl implements AuthService {
 
     @Autowired private final UserRepository userRepository;
     private final JwtTokenGenerator jwtTokenGenerator;
@@ -38,23 +37,23 @@ public class AuthServiceImpl implements  AuthService {
     private final RefreshTokenRepo refreshTokenRepo;
 
     public AuthResponse getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response) {
-        try
-        {
+        try {
             UserInfoEntity userInfoEntity = userRepository.findByEmailAddress(authentication.getName())
-                    .orElseThrow(()->{
-                        log.error("[AuthService:userSignInAuth] User :{} not found",authentication.getName());
-                        return new ResponseStatusException(HttpStatus.NOT_FOUND,"USER NOT FOUND ");});
+                    .orElseThrow(() -> {
+                        log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
+                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
+                    });
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
 
-            creatRefreshTokenCookie(response,refreshToken);
+            creatRefreshTokenCookie(response, refreshToken);
 
             //save refresh token
-            saveUserRefreshToken(userInfoEntity,refreshToken);
+            saveUserRefreshToken(userInfoEntity, refreshToken);
 
-            log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated",userInfoEntity.getUsername());
-            return  AuthResponse.builder()
+            log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", userInfoEntity.getUsername());
+            return AuthResponse.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
                     .userName(userInfoEntity.getUsername())
@@ -62,11 +61,11 @@ public class AuthServiceImpl implements  AuthService {
                     .userRole(userInfoEntity.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-
-
-        }catch (Exception e){
-            log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :"+e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Please Try Again");
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
         }
     }
 
@@ -82,19 +81,16 @@ public class AuthServiceImpl implements  AuthService {
                 .map(role -> (GrantedAuthority) role::trim)
                 .toArray(GrantedAuthority[]::new);
 
-
         return new UsernamePasswordAuthenticationToken(username, password, Arrays.asList(authorities));
     }
 
-
-    public AuthResponse registerUser(UserRegistrationRequest userRegistrationRequest){
-
-        try{
-            log.info("[AuthService:registerUser]User Registration Started with :::{}",userRegistrationRequest);
+    public AuthResponse registerUser(UserRegistrationRequest userRegistrationRequest) {
+        try {
+            log.info("[AuthService:registerUser]User Registration Started with :::{}", userRegistrationRequest);
 
             Optional<UserInfoEntity> user = userRepository.findByEmailAddress(userRegistrationRequest.getUserEmail());
-            if(user.isPresent()){
-                throw new Exception("User Already Exist");
+            if (user.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exists");
             }
 
             UserInfoEntity userDetailsEntity = userInfoMapper.mapUserRegistrationToUserInfoEntity(userRegistrationRequest);
@@ -105,8 +101,8 @@ public class AuthServiceImpl implements  AuthService {
 
             UserInfoEntity savedUserDetails = userRepository.save(userDetailsEntity);
 
-            log.info("[AuthService:registerUser] User:{} Successfully registered",savedUserDetails.getUsername());
-            return   AuthResponse.builder()
+            log.info("[AuthService:registerUser] User:{} Successfully registered", savedUserDetails.getUsername());
+            return AuthResponse.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(30 * 60)
                     .userName(savedUserDetails.getUsername())
@@ -114,37 +110,35 @@ public class AuthServiceImpl implements  AuthService {
                     .userRole(savedUserDetails.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-
-
-        }catch (Exception e){
-            log.error("[AuthService:registerUser]Exception while registering the user:"+e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[AuthService:registerUser]Exception while registering the user:" + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-
     }
 
     public Object getAccessTokenUsingRefreshToken(String cookieToken) {
-
-        if(cookieToken.isEmpty()){
-            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Please verify your token type");
+        if (cookieToken == null || cookieToken.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please verify your token type");
         }
 
         final String refreshToken = cookieToken;
 
         //Find refreshToken from database and should not be revoked : Same thing can be done through filter.
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
-                .filter(tokens-> !tokens.isRevoked())
-                .orElseThrow(()-> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Refresh token revoked"));
+                .filter(tokens -> !tokens.isRevoked())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token revoked"));
 
         UserInfoEntity userInfoEntity = refreshTokenEntity.getUser();
 
         //Now create the Authentication object
-        Authentication authentication =  createAuthenticationObject(userInfoEntity);
+        Authentication authentication = createAuthenticationObject(userInfoEntity);
 
         //Use the authentication object to generate new accessToken as the Authentication object that we will have may not contain correct role.
         String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
 
-        return  AuthResponse.builder()
+        return AuthResponse.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
                 .userName(userInfoEntity.getUsername())
@@ -163,13 +157,12 @@ public class AuthServiceImpl implements  AuthService {
         refreshTokenRepo.save(refreshTokenEntity);
     }
 
-    private Cookie creatRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie refreshTokenCookie = new Cookie("refresh_token",refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setMaxAge(15 * 24 * 60 * 60 ); // in seconds
-        response.addCookie(refreshTokenCookie);
-        return refreshTokenCookie;
+    private void creatRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        Cookie cookie = new Cookie("refresh_token", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        response.addCookie(cookie);
     }
-
 }

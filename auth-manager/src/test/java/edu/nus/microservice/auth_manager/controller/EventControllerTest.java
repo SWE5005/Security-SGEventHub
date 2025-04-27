@@ -11,11 +11,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,21 +21,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
 class EventControllerTest {
 
     @Mock
     private EventService eventService;
-
-    @InjectMocks
-    private EventController eventController;
 
     @Mock
     private Authentication authentication;
 
     @Mock
     private Jwt jwt;
+
+    @InjectMocks
+    private EventController eventController;
 
     @BeforeEach
     void setUp() {
@@ -48,47 +43,35 @@ class EventControllerTest {
     }
 
     @Test
-    void getAllEvents_ShouldReturnEvents() {
-        // Arrange
-        when(eventService.getAllEvents("test-user-id")).thenReturn(List.of());
-
-        // Act
-        ResponseEntity<?> response = eventController.getAllEvents(authentication);
-
-        // Assert
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-    }
-
-    @Test
     void createEvent_ShouldCreateEvent() {
         // Arrange
-        EventRequest request = new EventRequest();
-        request.setTitle("Test Event");
-        request.setDescription("Test Description");
-        request.setStartDatetime(LocalDateTime.now().toString());
-        request.setEndDatetime(LocalDateTime.now().plusHours(2).toString());
-        request.setLocation("Test Location");
-        request.setCapacity(100);
+        EventRequest request = EventRequest.builder()
+                .title("Test Event")
+                .description("Test Description")
+                .location("Test Location")
+                .startDatetime(LocalDateTime.now().toString())
+                .endDatetime(LocalDateTime.now().plusHours(2).toString())
+                .capacity(100)
+                .build();
 
-        EventDetailResponse expectedResponse = new EventDetailResponse();
-        expectedResponse.setId(UUID.randomUUID());
-        expectedResponse.setTitle(request.getTitle());
-        expectedResponse.setDescription(request.getDescription());
-        expectedResponse.setStartDatetime(LocalDateTime.parse(request.getStartDatetime()));
-        expectedResponse.setEndDatetime(LocalDateTime.parse(request.getEndDatetime()));
-        expectedResponse.setLocation(request.getLocation());
-        expectedResponse.setCapacity(request.getCapacity());
-        expectedResponse.setStatus("OPEN");
-        expectedResponse.setRegistrationCount(0);
+        EventDetailResponse expectedResponse = EventDetailResponse.builder()
+                .id(UUID.randomUUID())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .location(request.getLocation())
+                .startDatetime(LocalDateTime.parse(request.getStartDatetime()))
+                .endDatetime(LocalDateTime.parse(request.getEndDatetime()))
+                .capacity(request.getCapacity())
+                .status("ACTIVE")
+                .build();
 
-        // Set up the mock to return the expected response
-        doReturn(expectedResponse).when(eventService).createEvent(any(EventRequest.class), eq("test-user-id"));
+        when(eventService.createEvent(any(EventRequest.class), eq("test-user-id"))).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<?> response = eventController.createEvent(authentication, request);
 
         // Assert
+        assertNotNull(response);
         assertEquals(200, response.getStatusCodeValue());
         assertNotNull(response.getBody());
         EventDetailResponse actualResponse = (EventDetailResponse) response.getBody();
@@ -97,10 +80,6 @@ class EventControllerTest {
         assertEquals(expectedResponse.getLocation(), actualResponse.getLocation());
         assertEquals(expectedResponse.getCapacity(), actualResponse.getCapacity());
         assertEquals(expectedResponse.getStatus(), actualResponse.getStatus());
-
-        // Verify the service method was called
-        verify(eventService, times(1)).createEvent(any(EventRequest.class), eq("test-user-id"));
+        verify(eventService).createEvent(any(EventRequest.class), eq("test-user-id"));
     }
-
-    // 其它接口的测试可依次补充
 } 

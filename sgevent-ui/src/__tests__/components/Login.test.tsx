@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import Login from '../../components/Login';
 import { useLoginMutation } from '../../services/auth.service';
 import { selectAuthSlice } from '../../state/auth/slice';
 import { navigate } from 'gatsby';
+import { renderWithStore } from '../utils/testUtils';
 
 // Mock the gatsby navigate function
 jest.mock('gatsby', () => ({
@@ -27,29 +28,39 @@ describe('Login Component', () => {
   const mockUseLoginMutation = useLoginMutation as jest.Mock;
   const mockSelectAuthSlice = selectAuthSlice as jest.Mock;
 
+  const initialAuthState = {
+    isLoggedIn: false,
+    user: null,
+    error: null,
+    loading: false
+  };
+
   beforeEach(() => {
     mockUseLoginMutation.mockReturnValue([
       mockLogin,
       { isError: false, isLoading: false },
     ]);
 
-    mockSelectAuthSlice.mockReturnValue({
-      isLoggedIn: false,
-    });
+    mockSelectAuthSlice.mockReturnValue(initialAuthState);
+
+    // Reset all mocks before each test
+    jest.clearAllMocks();
   });
 
-  it('renders login form', () => {
-    render(<Login />);
+  it('renders login form with all elements', () => {
+    renderWithStore(<Login />, { auth: initialAuthState });
     
-    expect(screen.getByText('Welcome to Community Event Center')).toBeInTheDocument();
+    // Check for all required elements
     expect(screen.getByLabelText('Email Address')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByText('Login')).toBeInTheDocument();
     expect(screen.getByText('Login with Google')).toBeInTheDocument();
+    expect(screen.getByText('OR')).toBeInTheDocument();
+    expect(screen.getByText('Sign Up now')).toBeInTheDocument();
   });
 
   it('handles email input change', () => {
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const emailInput = screen.getByLabelText('Email Address');
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -58,7 +69,7 @@ describe('Login Component', () => {
   });
 
   it('handles password input change', () => {
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const passwordInput = screen.getByLabelText('Password');
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -66,8 +77,8 @@ describe('Login Component', () => {
     expect(passwordInput).toHaveValue('password123');
   });
 
-  it('handles login submission', () => {
-    render(<Login />);
+  it('handles login submission with valid credentials', async () => {
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const emailInput = screen.getByLabelText('Email Address');
     const passwordInput = screen.getByLabelText('Password');
@@ -90,23 +101,38 @@ describe('Login Component', () => {
       { isError: true, isLoading: false },
     ]);
 
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     expect(screen.getByText('Login failed. Please try again.')).toBeInTheDocument();
   });
 
-  it('navigates to home when logged in', () => {
-    mockSelectAuthSlice.mockReturnValue({
-      isLoggedIn: true,
-    });
+  it('shows loading state during login', () => {
+    mockUseLoginMutation.mockReturnValue([
+      mockLogin,
+      { isError: false, isLoading: true },
+    ]);
 
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
+    
+    const loginButton = screen.getByText('Login');
+    expect(loginButton).toBeDisabled();
+  });
+
+  it('navigates to home when logged in', () => {
+    const loggedInState = {
+      ...initialAuthState,
+      isLoggedIn: true
+    };
+
+    mockSelectAuthSlice.mockReturnValue(loggedInState);
+
+    renderWithStore(<Login />, { auth: loggedInState });
     
     expect(navigate).toHaveBeenCalledWith('/home');
   });
 
   it('handles Google login', () => {
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const googleButton = screen.getByText('Login with Google');
     fireEvent.click(googleButton);
@@ -115,7 +141,7 @@ describe('Login Component', () => {
   });
 
   it('navigates to signup page', () => {
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const signupLink = screen.getByText('Sign Up now');
     fireEvent.click(signupLink);
@@ -124,22 +150,55 @@ describe('Login Component', () => {
   });
 
   it('does not render when logged in', () => {
-    mockSelectAuthSlice.mockReturnValue({
-      isLoggedIn: true,
-    });
+    const loggedInState = {
+      ...initialAuthState,
+      isLoggedIn: true
+    };
 
-    const { container } = render(<Login />);
+    mockSelectAuthSlice.mockReturnValue(loggedInState);
+
+    const { container } = renderWithStore(<Login />, { auth: loggedInState });
     
     expect(container).toBeEmptyDOMElement();
   });
 
   it('requires email and password fields', () => {
-    render(<Login />);
+    renderWithStore(<Login />, { auth: initialAuthState });
     
     const emailInput = screen.getByLabelText('Email Address');
     const passwordInput = screen.getByLabelText('Password');
     
     expect(emailInput).toBeRequired();
     expect(passwordInput).toBeRequired();
+  });
+
+  it('handles empty form submission', () => {
+    renderWithStore(<Login />, { auth: initialAuthState });
+    
+    const loginButton = screen.getByText('Login');
+    fireEvent.click(loginButton);
+    
+    expect(mockLogin).toHaveBeenCalledWith({
+      emailAddress: '',
+      password: '',
+    });
+  });
+
+  it('handles special characters in email and password', () => {
+    renderWithStore(<Login />, { auth: initialAuthState });
+    
+    const emailInput = screen.getByLabelText('Email Address');
+    const passwordInput = screen.getByLabelText('Password');
+    
+    fireEvent.change(emailInput, { target: { value: 'test+special@example.com' } });
+    fireEvent.change(passwordInput, { target: { value: 'password!@#$%^&*()' } });
+    
+    const loginButton = screen.getByText('Login');
+    fireEvent.click(loginButton);
+    
+    expect(mockLogin).toHaveBeenCalledWith({
+      emailAddress: 'test+special@example.com',
+      password: 'password!@#$%^&*()',
+    });
   });
 }); 

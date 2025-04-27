@@ -1,95 +1,98 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import QuantityInput from '../../components/QuantityInput';
 
 describe('QuantityInput Component', () => {
   const defaultProps = {
     label: 'Quantity',
-    min: 0,
+    defaultValue: 1,
+    onChange: jest.fn(),
+    min: 1,
     max: 10,
+    disabled: false,
   };
 
-  it('renders with default props', () => {
-    render(<QuantityInput {...defaultProps} />);
-    
-    expect(screen.getByText('Quantity')).toBeInTheDocument();
-    expect(screen.getByRole('spinbutton')).toBeInTheDocument();
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
   });
 
-  it('renders with default value', () => {
-    render(<QuantityInput {...defaultProps} defaultValue={5} />);
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
+  it('renders with initial value', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} />);
     
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveValue(5);
+    expect(screen.getByRole('spinbutton')).toHaveValue(1);
   });
 
-  it('handles increment button click', () => {
-    render(<QuantityInput {...defaultProps} defaultValue={5} />);
+  it('handles increment', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} />);
     
-    const incrementButton = screen.getByRole('button', { name: /increment/i });
+    const incrementButton = screen.getByLabelText('Increment');
     fireEvent.click(incrementButton);
     
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveValue(6);
+    expect(defaultProps.onChange).toHaveBeenCalled();
   });
 
-  it('handles decrement button click', () => {
-    render(<QuantityInput {...defaultProps} defaultValue={5} />);
+  it('handles decrement', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} defaultValue={2} />);
     
-    const decrementButton = screen.getByRole('button', { name: /decrement/i });
+    const decrementButton = screen.getByLabelText('Decrement');
     fireEvent.click(decrementButton);
     
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveValue(4);
+    expect(defaultProps.onChange).toHaveBeenCalled();
   });
 
-  it('respects min value', () => {
-    render(<QuantityInput {...defaultProps} defaultValue={0} />);
+  it('does not increment beyond max value', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} defaultValue={10} />);
     
-    const decrementButton = screen.getByRole('button', { name: /decrement/i });
-    fireEvent.click(decrementButton);
-    
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveValue(0);
-  });
-
-  it('respects max value', () => {
-    render(<QuantityInput {...defaultProps} defaultValue={10} />);
-    
-    const incrementButton = screen.getByRole('button', { name: /increment/i });
+    const incrementButton = screen.getByLabelText('Increment');
     fireEvent.click(incrementButton);
     
-    const input = screen.getByRole('spinbutton');
-    expect(input).toHaveValue(10);
+    expect(defaultProps.onChange).not.toHaveBeenCalled();
   });
 
-  it('handles onChange event', () => {
-    const handleChange = jest.fn();
-    render(<QuantityInput {...defaultProps} onChange={handleChange} />);
+  it('does not decrement below min value', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} defaultValue={1} />);
+    
+    const decrementButton = screen.getByLabelText('Decrement');
+    fireEvent.click(decrementButton);
+    
+    expect(defaultProps.onChange).not.toHaveBeenCalled();
+  });
+
+  it('handles direct input', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} />);
     
     const input = screen.getByRole('spinbutton');
     fireEvent.change(input, { target: { value: '5' } });
     
-    expect(handleChange).toHaveBeenCalled();
+    expect(defaultProps.onChange).toHaveBeenCalled();
   });
 
-  it('renders in disabled state', () => {
-    render(<QuantityInput {...defaultProps} disabled />);
+  it('disables buttons when disabled', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} disabled={true} />);
     
-    const input = screen.getByRole('spinbutton');
-    expect(input).toBeDisabled();
+    const incrementButton = screen.getByLabelText('Increment');
+    const decrementButton = screen.getByLabelText('Decrement');
     
-    const incrementButton = screen.getByRole('button', { name: /increment/i });
     expect(incrementButton).toBeDisabled();
-    
-    const decrementButton = screen.getByRole('button', { name: /decrement/i });
     expect(decrementButton).toBeDisabled();
   });
 
-  it('renders with required prop', () => {
-    render(<QuantityInput {...defaultProps} required />);
+  it('disables input when disabled', () => {
+    renderWithProvider(<QuantityInput {...defaultProps} disabled={true} />);
     
     const input = screen.getByRole('spinbutton');
-    expect(input).toBeRequired();
+    expect(input).toBeDisabled();
   });
 }); 

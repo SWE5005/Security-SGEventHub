@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import EventList from '../../components/EventList';
 import { useGetEventListQuery, useDeleteEventMutation, useRegisterEventMutation } from '../../services/event.service';
+import { selectAuthSlice } from '../../state/auth/slice';
 
 // Mock the gatsby navigate function
 jest.mock('gatsby', () => ({
@@ -15,6 +16,11 @@ jest.mock('../../services/event.service', () => ({
   useGetEventListQuery: jest.fn(),
   useDeleteEventMutation: jest.fn(),
   useRegisterEventMutation: jest.fn(),
+}));
+
+// Mock the auth slice
+jest.mock('../../state/auth/slice', () => ({
+  selectAuthSlice: jest.fn(),
 }));
 
 describe('EventList Component', () => {
@@ -47,6 +53,12 @@ describe('EventList Component', () => {
   const mockDeleteEventMutation = useDeleteEventMutation as jest.Mock;
   const mockRegisterEventMutation = useRegisterEventMutation as jest.Mock;
 
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
   beforeEach(() => {
     mockGetEventListQuery.mockReturnValue({
       data: mockEvents,
@@ -63,10 +75,22 @@ describe('EventList Component', () => {
       jest.fn(),
       { isSuccess: false, isLoading: false },
     ]);
+
+    (selectAuthSlice as jest.Mock).mockReturnValue({
+      userInfo: { user_role: 'USER' },
+    });
   });
 
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
   it('renders list of events', () => {
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     expect(screen.getByText('Event 1')).toBeInTheDocument();
     expect(screen.getByText('Event 2')).toBeInTheDocument();
@@ -79,7 +103,7 @@ describe('EventList Component', () => {
       refetch: jest.fn(),
     });
 
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     const skeletons = screen.getAllByRole('progressbar');
     expect(skeletons.length).toBeGreaterThan(0);
@@ -92,14 +116,14 @@ describe('EventList Component', () => {
       refetch: jest.fn(),
     });
 
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     expect(screen.queryByText('Event 1')).not.toBeInTheDocument();
     expect(screen.queryByText('Event 2')).not.toBeInTheDocument();
   });
 
   it('navigates to edit page when edit button is clicked', () => {
-    render(<EventList isAdmin={true} />);
+    renderWithProvider(<EventList isAdmin={true} />);
     
     const editButtons = screen.getAllByLabelText('Edit');
     editButtons[0].click();
@@ -108,7 +132,7 @@ describe('EventList Component', () => {
   });
 
   it('navigates to details page when details button is clicked', () => {
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     const detailsButtons = screen.getAllByText('Details');
     detailsButtons[0].click();
@@ -129,7 +153,7 @@ describe('EventList Component', () => {
       { isSuccess: true, isLoading: false },
     ]);
 
-    render(<EventList isAdmin={true} />);
+    renderWithProvider(<EventList isAdmin={true} />);
     
     await waitFor(() => {
       expect(refetch).toHaveBeenCalled();
@@ -149,7 +173,7 @@ describe('EventList Component', () => {
       { isSuccess: true, isLoading: false },
     ]);
 
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     await waitFor(() => {
       expect(refetch).toHaveBeenCalled();
@@ -162,7 +186,7 @@ describe('EventList Component', () => {
       { isSuccess: false, isLoading: true, originalArgs: { eventId: '1' } },
     ]);
 
-    render(<EventList isAdmin={false} />);
+    renderWithProvider(<EventList isAdmin={false} />);
     
     const joinButton = screen.getByText('Join');
     expect(joinButton).toBeDisabled();

@@ -1,8 +1,47 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 import Layout from '../../components/Layout';
 
 describe('Layout Component', () => {
+  const defaultProps = {
+    children: <div>Test Content</div>,
+    isLoading: false,
+  };
+
+  const mockStore = configureStore({
+    reducer: {
+      auth: (state = { userInfo: { user_role: 'USER' } }, action) => state,
+    },
+  });
+
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <Provider store={mockStore}>
+        {ui}
+      </Provider>
+    );
+  };
+
+  it('renders header', () => {
+    renderWithProvider(<Layout {...defaultProps} />);
+    
+    expect(screen.getByText('SG EventHub')).toBeInTheDocument();
+  });
+
+  it('renders children', () => {
+    renderWithProvider(<Layout {...defaultProps} />);
+    
+    expect(screen.getByText('Test Content')).toBeInTheDocument();
+  });
+
+  it('renders footer', () => {
+    renderWithProvider(<Layout {...defaultProps} />);
+    
+    expect(screen.getByText('© 2024 SG EventHub')).toBeInTheDocument();
+  });
+
   it('renders children when not loading', () => {
     render(
       <Layout isLoading={false}>
@@ -63,5 +102,11 @@ describe('Layout Component', () => {
     render(<Layout isLoading={false} />);
     
     expect(screen.queryByText('Test Content')).not.toBeInTheDocument();
+  });
+
+  it('shows loading state', () => {
+    renderWithProvider(<Layout {...defaultProps} isLoading={true} />);
+    
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 }); 
