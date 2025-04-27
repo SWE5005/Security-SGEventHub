@@ -15,9 +15,10 @@ const Permission: React.FC<PermissionProps> = ({ authKeyList, children }) => {
     //if user is not logged in, navigate to login page
     navigate('/login');
   } else if (!hasPermission) {
-    //if user does not have permission to access, navigate to 401 page
-    navigate('/401');
+    //if user does not have permission to access, navigate to 403 page
+    navigate('/403');
   }
+
   return children;
 };
 
