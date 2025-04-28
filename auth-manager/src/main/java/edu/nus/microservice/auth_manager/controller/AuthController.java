@@ -26,54 +26,46 @@ public class AuthController {
 
   @PostMapping("/sign-in")
   public ResponseEntity<?> authenticateUser(
-    Authentication authentication,
-    HttpServletResponse response
-  ) {
+      Authentication authentication,
+      HttpServletResponse response) {
     log.info(
-      "[AuthController:signIn]SignIn Process Started for user:{}",
-      authentication.getName()
-    );
+        "[AuthController:signIn]SignIn Process Started for user:{}",
+        authentication.getName());
     return ResponseEntity.ok(
-      authService.getJwtTokensAfterAuthentication(authentication, response)
-    );
+        authService.getJwtTokensAfterAuthentication(authentication, response));
   }
 
-  @PostMapping("/google/sign-in")
+  @GetMapping("/google/sign-in")
   public ResponseEntity<?> authenticateGoogleUser(
-    Authentication authentication,
-    HttpServletResponse response
-  ) {
+      Authentication authentication,
+      HttpServletResponse response) {
     log.info(
-      "[AuthController:GoogleSignIn]SignIn Process Started for user:{}",
-      authentication.getName()
-    );
+        "[AuthController:GoogleSignIn]SignIn Process Started for user:{}",
+        authentication.getName());
     return ResponseEntity.ok(
-      authService.getJwtTokensAfterAuthentication(authentication, response)
-    );
+        authService.getJwtTokensAfterAuthentication(authentication, response));
   }
 
   @PostMapping("/sign-up")
   public ResponseEntity<?> registerUser(
-    @Valid @RequestBody UserRegistrationRequest userRegistrationRequest,
-    BindingResult bindingResult
-  ) {
+      @Valid @RequestBody UserRegistrationRequest userRegistrationRequest,
+      BindingResult bindingResult) {
     log.info(
-      "[AuthController:registerUser]Signup Process Started for user:{}",
-      userRegistrationRequest.getUserEmail()
-    );
+        "[AuthController:registerUser]Signup Process Started for user:{}",
+        userRegistrationRequest.getUserEmail());
     if (bindingResult.hasErrors()) {
       List<String> errorMessage = bindingResult
-        .getAllErrors()
-        .stream()
-        .map(DefaultMessageSourceResolvable::getDefaultMessage)
-        .toList();
+          .getAllErrors()
+          .stream()
+          .map(DefaultMessageSourceResolvable::getDefaultMessage)
+          .toList();
       log.error("[AuthController:registerUser]Errors in user:{}", errorMessage);
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
     return ResponseEntity.ok(authService.registerUser(userRegistrationRequest));
   }
 
-  //    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
+  // @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
   @PostMapping("/refresh-token")
   public ResponseEntity<?> getAccessToken(HttpServletRequest request) {
     Cookie[] cookies = request.getCookies();
