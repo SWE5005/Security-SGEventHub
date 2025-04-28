@@ -80,4 +80,65 @@ class UserInfoMapperTest {
         assertEquals("USER", response.getRoles());
         assertEquals("ACTIVE", response.getActiveStatus());
     }
+
+    @Test
+    void mapUserRegistrationToUserInfoEntity_ShouldHandleNullRequest() {
+        assertThrows(NullPointerException.class, () -> userInfoMapper.mapUserRegistrationToUserInfoEntity(null));
+    }
+
+    @Test
+    void mapUserRequestToUserInfoEntity_ShouldHandleNullRequest() {
+        assertThrows(NullPointerException.class, () -> userInfoMapper.mapUserRequestToUserInfoEntity(null));
+    }
+
+    @Test
+    void mapGoogleUserToUserInfoEntity_ShouldHandleNulls() {
+        assertDoesNotThrow(() -> userInfoMapper.mapGoogleUserToUserInfoEntity(null, "name"));
+        assertDoesNotThrow(() -> userInfoMapper.mapGoogleUserToUserInfoEntity("email", null));
+    }
+
+    @Test
+    void convertToUserResponse_ShouldHandleNullEntity() {
+        assertThrows(NullPointerException.class, () -> userInfoMapper.convertToUserResponse(null));
+    }
+
+    @Test
+    void mapUserRegistrationToUserInfoEntity_ShouldHandlePartialNullFields() {
+        UserRegistrationRequest req = UserRegistrationRequest.builder()
+                .userName(null)
+                .userEmail(null)
+                .userPassword(null)
+                .userRole(null)
+                .userMobileNo(null)
+                .build();
+        assertDoesNotThrow(() -> userInfoMapper.mapUserRegistrationToUserInfoEntity(req));
+    }
+
+    @Test
+    void mapUserRequestToUserInfoEntity_ShouldHandlePartialNullFields() {
+        CreateUserRequest req = CreateUserRequest.builder()
+                .userName(null)
+                .emailAddress(null)
+                .mobileNumber(null)
+                .build();
+        assertDoesNotThrow(() -> userInfoMapper.mapUserRequestToUserInfoEntity(req));
+    }
+
+    @Test
+    void mapGoogleUserToUserInfoEntity_ShouldHandleEmptyStrings() {
+        assertDoesNotThrow(() -> userInfoMapper.mapGoogleUserToUserInfoEntity("", ""));
+    }
+
+    @Test
+    void convertToUserResponse_ShouldHandlePartialNullFields() {
+        UserInfoEntity entity = UserInfoEntity.builder()
+                .id(java.util.UUID.randomUUID())
+                .username(null)
+                .emailAddress(null)
+                .mobileNumber(null)
+                .activeStatus(null)
+                .roles(null)
+                .build();
+        assertDoesNotThrow(() -> userInfoMapper.convertToUserResponse(entity));
+    }
 } 

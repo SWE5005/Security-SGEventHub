@@ -5,7 +5,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 class RSAKeyRecordTest {
     @Test
@@ -15,5 +15,14 @@ class RSAKeyRecordTest {
         RSAKeyRecord record = new RSAKeyRecord(pub, priv);
         assertEquals(pub, record.rsaPublicKey());
         assertEquals(priv, record.rsaPrivateKey());
+    }
+
+    @Test
+    void testRSAKeyRecordGetters() {
+        RSAPublicKey publicKey = mock(RSAPublicKey.class);
+        RSAPrivateKey privateKey = mock(RSAPrivateKey.class);
+        RSAKeyRecord record = new RSAKeyRecord(publicKey, privateKey);
+        assertEquals(publicKey, record.rsaPublicKey());
+        assertEquals(privateKey, record.rsaPrivateKey());
     }
 } 
