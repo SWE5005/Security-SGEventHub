@@ -108,7 +108,7 @@ public class AuthServiceImpl implements AuthService {
 
             return AuthResponse.builder()
                     .accessToken(accessToken)
-                    .accessTokenExpiry(30 * 60)
+                    .accessTokenExpiry(5 * 60)
                     .userName(savedUserDetails.getUsername())
                     .emailAddress(savedUserDetails.getEmailAddress())
                     .userRole(savedUserDetails.getRoles())
@@ -169,6 +169,7 @@ public class AuthServiceImpl implements AuthService {
         Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(15 * 24 * 60 * 60); // in seconds
         response.addCookie(refreshTokenCookie);
         return refreshTokenCookie;
