@@ -4,5 +4,5 @@ public
 .vscode/
 launch.json
 .env
-!.env.template
+!.env.development
 .scannerwork
