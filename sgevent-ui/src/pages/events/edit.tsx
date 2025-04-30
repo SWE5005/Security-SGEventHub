@@ -16,7 +16,7 @@ const EditEvent: React.FC<PageProps> = ({ location }) => {
     throw new Error('Event ID is null');
   }
 
-  const { data, error, isFetching, refetch } = useGetEventDetailsQuery(eventId);
+  const { data, isFetching } = useGetEventDetailsQuery(eventId);
   const [updateEvent, result] = useSaveEventMutation();
   const [removeParticipant, removeResult] = useRemoveParticipantMutation();
   const [type, setType] = useState('view');
