@@ -28,14 +28,27 @@ export const toBase64 = (file: Blob, callback: Function) => {
   reader.readAsDataURL(file);
 };
 
+export const getXsrfTokenFromCookie = () => {
+  if (document) {
+    const csrfToken = document.cookie.replace(/(?:(?:^|.*;\s*)XSRF-TOKEN\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    return csrfToken;
+  } else {
+    console.warn('Failed to get Xsrf token from cookie');
+    return '';
+  }
+};
+
 export const commonHeader: FetchBaseQueryArgs['prepareHeaders'] = (headers, { getState }) => {
   const slices = getState() as RootState;
   const accessToken = slices[AUTH_SLICE_NAME].userInfo.access_token;
   const tokenType = slices[AUTH_SLICE_NAME].userInfo.token_type;
 
+  headers.set('X-XSRF-TOKEN', getXsrfTokenFromCookie());
+
   if (accessToken) {
     headers.set('Authorization', tokenType + ' ' + accessToken);
   }
+
   return headers;
 };
 
