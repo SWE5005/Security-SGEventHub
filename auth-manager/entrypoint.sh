@@ -1,3 +1,5 @@
+#!/bin/sh
+
 mkdir -p /app/certs
 
 # Decode base64 certs
