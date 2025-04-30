@@ -118,14 +118,9 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public Object getAccessTokenUsingRefreshToken(String cookieToken) {
-<<<<<<< HEAD
-        if (cookieToken == null || cookieToken.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please verify your token type");
-=======
 
-        if (cookieToken.isEmpty()) {
+        if (cookieToken == null || cookieToken.isEmpty()) {
             return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please verify your token type");
->>>>>>> main
         }
 
         final String refreshToken = cookieToken;
