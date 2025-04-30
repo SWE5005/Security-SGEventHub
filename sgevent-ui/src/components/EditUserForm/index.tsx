@@ -132,7 +132,6 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ value, onSubmit, isUpdating
             fullWidth
             variant="contained"
             type="submit"
-            loadingPosition="end"
             loading={isUpdating}
             onClick={() => {
               onSubmit(user);

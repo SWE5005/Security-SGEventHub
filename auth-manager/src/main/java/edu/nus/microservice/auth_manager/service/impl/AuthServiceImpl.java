@@ -42,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
             UserInfoEntity userInfoEntity = userRepository.findByEmailAddress(authentication.getName())
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
-                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND ");
+                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
                     });
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
@@ -63,7 +63,6 @@ public class AuthServiceImpl implements AuthService {
                     .userRole(userInfoEntity.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-
         } catch (Exception e) {
             log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
@@ -86,7 +85,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public AuthResponse registerUser(UserRegistrationRequest userRegistrationRequest) {
-
         try {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", userRegistrationRequest);
 
@@ -105,7 +103,6 @@ public class AuthServiceImpl implements AuthService {
             UserInfoEntity savedUserDetails = userRepository.save(userDetailsEntity);
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", savedUserDetails.getUsername());
-
             return AuthResponse.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
@@ -114,17 +111,15 @@ public class AuthServiceImpl implements AuthService {
                     .userRole(savedUserDetails.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-
         } catch (Exception e) {
             log.error("[AuthService:registerUser]Exception while registering the user:" + e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-
     }
 
     public Object getAccessTokenUsingRefreshToken(String cookieToken) {
 
-        if (cookieToken.isEmpty()) {
+        if (cookieToken == null || cookieToken.isEmpty()) {
             return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please verify your token type");
         }
 
@@ -174,5 +169,4 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(refreshTokenCookie);
         return refreshTokenCookie;
     }
-
 }
