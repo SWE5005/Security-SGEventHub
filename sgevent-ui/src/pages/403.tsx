@@ -77,17 +77,17 @@ const ErrorPageLayout: React.FC<ErrorPageProps> = ({
   );
 };
 
-
-const UnauthorizedPage = () => {
+const ForbiddenPage = () => {
   return (
     <ErrorPageLayout
-      statusCode="401"
-      title="Unauthorized Access"
-      message="Sorry, you need to be logged in to view this page."
+      statusCode="403"
+      title="Forbidden"
+      message="Sorry you do not have the permissions required to view this page."
     />
   );
 };
 
-export default UnauthorizedPage;
+export default ForbiddenPage;
 
-export const Head = () => <title>401 Unauthorized Access</title>;
+// Update the Head export for SEO and browser tab title
+export const Head = () => <title>403 Forbidden</title>;

@@ -31,7 +31,8 @@ import java.util.*;
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired private final UserRepository userRepository;
+    @Autowired
+    private final UserRepository userRepository;
     private final JwtTokenGenerator jwtTokenGenerator;
     private final UserInfoMapper userInfoMapper;
     private final RefreshTokenRepo refreshTokenRepo;
@@ -49,10 +50,11 @@ public class AuthServiceImpl implements AuthService {
 
             creatRefreshTokenCookie(response, refreshToken);
 
-            //save refresh token
+            // save refresh token
             saveUserRefreshToken(userInfoEntity, refreshToken);
 
-            log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", userInfoEntity.getUsername());
+            log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated",
+                    userInfoEntity.getUsername());
             return AuthResponse.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
@@ -61,8 +63,6 @@ public class AuthServiceImpl implements AuthService {
                     .userRole(userInfoEntity.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-        } catch (ResponseStatusException e) {
-            throw e;
         } catch (Exception e) {
             log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
@@ -89,29 +89,28 @@ public class AuthServiceImpl implements AuthService {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", userRegistrationRequest);
 
             Optional<UserInfoEntity> user = userRepository.findByEmailAddress(userRegistrationRequest.getUserEmail());
+
             if (user.isPresent()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exists");
+                throw new Exception("User Already Exist");
             }
 
-            UserInfoEntity userDetailsEntity = userInfoMapper.mapUserRegistrationToUserInfoEntity(userRegistrationRequest);
+            UserInfoEntity userDetailsEntity = userInfoMapper
+                    .mapUserRegistrationToUserInfoEntity(userRegistrationRequest);
             Authentication authentication = createAuthenticationObject(userDetailsEntity);
 
             // Generate a JWT token
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userDetailsEntity);
-
             UserInfoEntity savedUserDetails = userRepository.save(userDetailsEntity);
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", savedUserDetails.getUsername());
             return AuthResponse.builder()
                     .accessToken(accessToken)
-                    .accessTokenExpiry(30 * 60)
+                    .accessTokenExpiry(5 * 60)
                     .userName(savedUserDetails.getUsername())
                     .emailAddress(savedUserDetails.getEmailAddress())
                     .userRole(savedUserDetails.getRoles())
                     .tokenType(TokenType.Bearer)
                     .build();
-        } catch (ResponseStatusException e) {
-            throw e;
         } catch (Exception e) {
             log.error("[AuthService:registerUser]Exception while registering the user:" + e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -119,23 +118,32 @@ public class AuthServiceImpl implements AuthService {
     }
 
     public Object getAccessTokenUsingRefreshToken(String cookieToken) {
+<<<<<<< HEAD
         if (cookieToken == null || cookieToken.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Please verify your token type");
+=======
+
+        if (cookieToken.isEmpty()) {
+            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please verify your token type");
+>>>>>>> main
         }
 
         final String refreshToken = cookieToken;
 
-        //Find refreshToken from database and should not be revoked : Same thing can be done through filter.
+        // Find refreshToken from database and should not be revoked : Same thing can be
+        // done through filter.
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Refresh token revoked"));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
 
         UserInfoEntity userInfoEntity = refreshTokenEntity.getUser();
 
-        //Now create the Authentication object
+        // Now create the Authentication object
         Authentication authentication = createAuthenticationObject(userInfoEntity);
 
-        //Use the authentication object to generate new accessToken as the Authentication object that we will have may not contain correct role.
+        // Use the authentication object to generate new accessToken as the
+        // Authentication object that we will have may not contain correct role.
         String accessToken = jwtTokenGenerator.generateAccessToken(authentication, userInfoEntity);
 
         return AuthResponse.builder()
@@ -157,12 +165,13 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenRepo.save(refreshTokenEntity);
     }
 
-    private void creatRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        Cookie cookie = new Cookie("refresh_token", refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
-        response.addCookie(cookie);
+    private Cookie creatRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        Cookie refreshTokenCookie = new Cookie("refresh_token", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(15 * 24 * 60 * 60); // in seconds
+        response.addCookie(refreshTokenCookie);
+        return refreshTokenCookie;
     }
 }

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -27,16 +26,15 @@ public class ManageUserServiceImpl implements ManageUserService {
     private final UserInfoMapper userInfoMapper;
 
     public List<UserResponse> getAllUsers() {
-        List<UserInfoEntity> userList =  userRepository.findAll();
+        List<UserInfoEntity> userList = userRepository.findAll();
         return userList.stream().map(userInfoMapper::convertToUserResponse).toList();
     }
 
-
-    public UserResponse createUser(CreateUserRequest userRequest){
+    public UserResponse createUser(CreateUserRequest userRequest) {
         try {
             UserInfoEntity userEntity = userInfoMapper.mapUserRequestToUserInfoEntity(userRequest);
 
-            UserInfoEntity user =  userRepository.save(userEntity);
+            UserInfoEntity user = userRepository.save(userEntity);
             return userInfoMapper.convertToUserResponse(user);
         } catch (Exception e) {
             log.error("[UserService:createUser]Failed to create user: ", e);
@@ -44,7 +42,7 @@ public class ManageUserServiceImpl implements ManageUserService {
         }
     }
 
-    public UserResponse getUserDetails(String userId){
+    public UserResponse getUserDetails(String userId) {
         try {
             UUID id = UUID.fromString(userId);
             Optional<UserInfoEntity> userInfo = userRepository.findById(id);
@@ -57,7 +55,7 @@ public class ManageUserServiceImpl implements ManageUserService {
         }
     }
 
-    public Optional<UserInfoEntity> findByEmail(String emailAddress){
+    public Optional<UserInfoEntity> findByEmail(String emailAddress) {
         try {
             return userRepository.findByEmailAddress(emailAddress);
         } catch (Exception e) {
@@ -66,21 +64,22 @@ public class ManageUserServiceImpl implements ManageUserService {
         }
     }
 
-    public void saveUser(UserInfoEntity userInfo){
+    public void saveUser(UserInfoEntity userInfo) {
         try {
-             userRepository.save(userInfo);
+            userRepository.save(userInfo);
         } catch (Exception e) {
             log.error("[UserService:saveUser]Failed to save user: ", e);
             throw new RuntimeException(e);
         }
     }
 
-
-    public String updateUser(ManageUserRequest userRequest){
+    public String updateUser(ManageUserRequest userRequest) {
         try {
             UUID id = UUID.fromString(userRequest.getUserId());
-            Integer result = userRepository.updateUser(id, userRequest.getUserName(), userRequest.getMobileNumber(), userRequest.getRoles(), userRequest.getActiveStatus());
-            if (result==0) return "Failed to update user.";
+            Integer result = userRepository.updateUser(id, userRequest.getUserName(), userRequest.getMobileNumber(),
+                    userRequest.getRoles(), userRequest.getActiveStatus());
+            if (result == 0)
+                return "Failed to update user.";
             return "Update user successfully.";
         } catch (Exception e) {
             log.error("[UserService:updateUser]Failed to update user details: ", e);
@@ -88,7 +87,7 @@ public class ManageUserServiceImpl implements ManageUserService {
         }
     }
 
-    public void deleteUser(String userId){
+    public void deleteUser(String userId) {
         try {
             UUID id = UUID.fromString(userId);
             userRepository.deleteById(id);

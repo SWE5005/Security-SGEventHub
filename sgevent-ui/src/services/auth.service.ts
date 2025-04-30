@@ -21,6 +21,7 @@ export const authApi = createApi({
             headers: {
               Authorization: `Basic ${token}`,
               'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest', // hint to prevent Spring Boot from adding WWW-Authenticate header in response
             },
             credentials: 'include',
           });
@@ -40,7 +41,7 @@ export const authApi = createApi({
     loginWithGoogle: builder.mutation<LoginResponse, void>({
       query: () => ({
         url: `/google/sign-in`,
-        method: 'POST',
+        method: 'GET',
       }),
     }),
     signUp: builder.mutation<LoginResponse, SignupRequest>({
@@ -53,7 +54,7 @@ export const authApi = createApi({
     logout: builder.mutation<string, void>({
       query: () => ({
         url: '/logout',
-        method: 'POST',
+        method: 'GET',
       }),
     }),
   }),
