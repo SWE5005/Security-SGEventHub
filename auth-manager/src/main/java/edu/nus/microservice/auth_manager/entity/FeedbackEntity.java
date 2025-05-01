@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 public class FeedbackEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id")
   private UUID id;
 
