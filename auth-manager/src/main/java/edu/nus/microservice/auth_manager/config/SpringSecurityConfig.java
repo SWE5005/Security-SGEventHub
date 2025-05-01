@@ -140,7 +140,7 @@ public class SpringSecurityConfig {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/api/auth/sign-up/**"))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(new String[] { "POST" })))
-                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
