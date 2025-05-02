@@ -18,7 +18,7 @@ const Login = () => {
 
   const onLoginWithGoogle = useCallback(() => {
     // Auth backend will redirect to Google
-    navigate(`${authUrl}/oauth2/authorization/google`);
+    window.location.href = `${authUrl}/oauth2/authorization/google`;
   }, []);
 
   useEffect(() => {
