@@ -162,6 +162,8 @@ public class SpringSecurityConfig {
                 .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord,jwtTokenUtils,refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}",ex);
+                    log.info(rsaKeyRecord.rsaPrivateKey().toString());
+                    log.info(rsaKeyRecord.rsaPublicKey().toString());
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
                     ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
                 })
