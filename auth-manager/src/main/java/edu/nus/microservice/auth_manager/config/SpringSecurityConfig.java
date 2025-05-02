@@ -105,7 +105,7 @@ public class SpringSecurityConfig {
                 .securityMatcher("/api/auth/google/**", "/oauth2/**", "/login/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeRequests(authorizeRequests ->
+                .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> {

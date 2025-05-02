@@ -87,9 +87,7 @@ public class CustomAuthSuccessHandler
 
       getRedirectStrategy()
               .sendRedirect(request, response, frontendUrl + "/callback");
-      log.info("call back testing 1");
-      log.info("request:"+request.toString());
-      log.info("response:"+response.toString());
+
     } else {
       this.setAlwaysUseDefaultTargetUrl(true);
       this.setDefaultTargetUrl(frontendUrl + "/callback");
