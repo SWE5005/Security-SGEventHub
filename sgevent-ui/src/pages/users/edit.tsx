@@ -1,50 +1,39 @@
-import React, { useEffect } from "react";
-import Layout from "../../components/Layout";
-import AdminPageLayout from "../../components/AdminPageLayout";
-import EditUserForm from "../../components/EditUserForm";
-import {
-    useGetUserDetailsQuery,
-    useUpdateUserMutation,
-} from "../../services/user.service";
-import { useGetRoleListQuery } from "../../services/role.service";
-import { navigate, PageProps } from "gatsby";
-import EditEvent from '../events/edit';
+import React, { useEffect } from 'react';
+import Layout from '../../components/Layout';
+import AdminPageLayout from '../../components/AdminPageLayout';
+import EditUserForm from '../../components/EditUserForm';
+import { useGetUserDetailsQuery, useUpdateUserMutation } from '../../services/user.service';
+import { navigate, PageProps } from 'gatsby';
+import Permission from '../../components/Permission';
 
 const EditUser: React.FC<PageProps> = ({ location }) => {
-    const params = new URLSearchParams(location.search);
-    const userId = params.get("userId");
+  const params = new URLSearchParams(location.search);
+  const userId = params.get('userId');
 
-    if (userId === null) {
-        throw new Error("User ID is null");
-    }
+  if (userId === null) {
+    throw new Error('User ID is null');
+  }
 
-    const { data, error, isLoading } = useGetUserDetailsQuery(userId);
-    const { data: roleList, isLoading: isRoleLoading } = useGetRoleListQuery();
-    const [updateUser, result] = useUpdateUserMutation();
-    console.log(data, roleList);
+  const { data, error, isLoading } = useGetUserDetailsQuery(userId);
+  const [updateUser, result] = useUpdateUserMutation();
 
-    useEffect(() => {
-        if (result.isSuccess) navigate("/users");
-    }, [result.isSuccess]);
+  useEffect(() => {
+    if (result.isSuccess) navigate('/users');
+  }, [result.isSuccess]);
 
-    const onUpdateUser = (user) => {
-        updateUser(user);
-    };
+  const onUpdateUser = (user: SgehUser) => {
+    updateUser(user);
+  };
 
-    return (
-        <Layout isLoading={isLoading || isRoleLoading}>
-            <AdminPageLayout title="Edit User">
-                <EditUserForm
-                    isEdit
-                    value={data}
-                    roleList={roleList}
-                    onSubmit={onUpdateUser}
-                    isUpdating={result.isLoading}
-                    isError={result.isError}
-                />
-            </AdminPageLayout>
-        </Layout>
-    );
-}
+  return (
+    <Permission authKeyList={['SUPER_ADMIN']}>
+      <Layout isLoading={isLoading}>
+        <AdminPageLayout title="Edit User">
+          <EditUserForm isEdit value={data} onSubmit={onUpdateUser} isUpdating={result.isLoading} isError={result.isError} />
+        </AdminPageLayout>
+      </Layout>
+    </Permission>
+  );
+};
 
 export default EditUser;

@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +41,9 @@ public class EventMapper {
     }
 
     public EventEntity convertToEventEntity(EventRequest request, UserInfoEntity owner){
+        UUID id = request.getId() == null ? UUID.randomUUID() : UUID.fromString(request.getId());
         return EventEntity.builder()
-                .id(UUID.randomUUID())
+                .id(id)
                 .title(request.getTitle())
                 .owner(owner)
                 .description(request.getDescription())
@@ -57,8 +59,8 @@ public class EventMapper {
 
     public EventDetailResponse convertToEventDetails(EventEntity event, UUID userId){
         List<EventRegistrationEntity> registrationList = event.getRegistration();
-        List<EventDetailUser> userList = registrationList.stream().map(EventRegistrationMapper::convertToEventDetailUser).toList();
-        Boolean isRegistered = registrationList.stream().filter(o->o.user.getId().equals(userId)).findFirst().isPresent();
+        List<EventDetailUser> userList = registrationList==null ? new ArrayList<>() : registrationList.stream().map(EventRegistrationMapper::convertToEventDetailUser).toList();
+        Boolean isRegistered = !(registrationList==null) && registrationList.stream().filter(o -> o.user.getId().equals(userId)).findFirst().isPresent();
         return EventDetailResponse.builder()
                 .id(event.getId())
                 .title(event.getTitle())
@@ -71,7 +73,8 @@ public class EventMapper {
                 .cover(event.getCover())
                 .createDatetime(event.getCreateDatetime())
                 .isRegistered(isRegistered)
-                .registrationCount(registrationList.stream().count())
+                .status(event.getStatus())
+                .registrationCount(registrationList==null ? 0 : registrationList.stream().count())
                 .userList(userList)
                 .build();
     }

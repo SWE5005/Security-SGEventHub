@@ -3,7 +3,6 @@ package edu.nus.microservice.auth_manager.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,36 +15,29 @@ import java.util.UUID;
 @NoArgsConstructor
 @SuperBuilder
 public class UserInfoEntity {
+
 	@Id
-	@GeneratedValue(strategy= GenerationType.UUID)
-	@Column(name = "id", nullable = false)
+	@Column(name = "id", updatable = false, nullable = false)
 	private UUID id;
 
-	@NotNull
 	@Column(name = "name", nullable = false)
 	private String username;
 
-	@NotNull
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@NotNull
 	@Column(name = "emailAddress", nullable = false, unique = true)
 	private String emailAddress;
 
-	@NotNull
 	@Column(name = "activeStatus", nullable = false)
 	private String activeStatus;
 
-	@NotNull
 	@Column(name = "mobileNumber", nullable = false)
 	private String mobileNumber;
 
-	@NotNull
 	@Column(name = "roles", nullable = false)
 	private String roles;
 
-	@NotNull
 	@Column(name = "create_datetime", nullable = false)
 	private LocalDateTime createDatetime;
 

@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { commonHeader } from '../utils';
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { fetchBaseQueryAuthMiddleware, commonHeader } from '../utils';
 import { RootState } from '../state/store';
 
 export const eventReducerName = 'eventApi';
@@ -15,7 +15,7 @@ interface SgehEventDetails extends SgehEvent {
 
 export const eventApi = createApi({
   reducerPath: eventReducerName,
-  baseQuery: fetchBaseQuery({
+  baseQuery: fetchBaseQueryAuthMiddleware({
     baseUrl: process.env.GATSBY_BACKEND_API_URL + '/api/event',
     prepareHeaders: commonHeader,
     credentials: 'include',
@@ -31,40 +31,40 @@ export const eventApi = createApi({
       providesTags: ['EventList'],
     }),
     getEventDetails: builder.query<SgehEventDetails, string>({
-      query: id => ({
-        url: `api/event-manager/event/details?eventid=${id}`,
+      query: eventId => ({
+        url: `/${eventId}/details`,
         method: 'GET',
       }),
       providesTags: ['EventDetails'],
     }),
-    addEvent: builder.mutation<SgehEventResult, SgehEvent>({
+    saveEvent: builder.mutation<SgehEventResult, SgehEvent>({
       query: payload => ({
-        url: 'api/event-manager/event/create',
+        url: '/create',
         method: 'POST',
         body: payload,
       }),
       invalidatesTags: ['EventList'],
     }),
     deleteEvent: builder.mutation<void, string>({
-      query: id => ({
-        url: `api/event-manager/event/delete/${id}`,
+      query: eventId => ({
+        url: `/${eventId}/delete`,
         method: 'DELETE',
       }),
       invalidatesTags: ['EventList'],
     }),
-    updateEvent: builder.mutation<void, SgehEvent>({
-      query: payload => ({
-        url: 'api/event-manager/event/update',
-        method: 'POST',
-        body: payload,
+    registerEvent: builder.mutation<void, RegisterRequest>({
+      query: ({ type, eventId }) => ({
+        url: `/${eventId}/${type}/register`,
+        method: 'GET',
       }),
       invalidatesTags: ['EventList', 'EventDetails'],
     }),
-    registerEvent: builder.mutation<void, { type: string; eventId: string; userId: string }>({
-      query: ({ type, eventId, userId }) => ({
-        url: `api/event-manager/event/registration/${type}/${eventId}/${userId}`,
+    removeParticipant: builder.mutation<void, RemoveParticipantRequest>({
+      query: ({ userId, eventId }) => ({
+        url: `/${eventId}/${userId}/removeParticipant`,
         method: 'GET',
       }),
+      invalidatesTags: ['EventDetails'],
     }),
   }),
 });
@@ -73,8 +73,8 @@ export const selectEvent = (state: RootState) => state[eventReducerName];
 export const {
   useGetEventListQuery,
   useGetEventDetailsQuery,
-  useAddEventMutation,
+  useSaveEventMutation,
   useDeleteEventMutation,
-  useUpdateEventMutation,
   useRegisterEventMutation,
+  useRemoveParticipantMutation,
 } = eventApi;

@@ -1,49 +1,92 @@
-import * as React from "react"
-import { Link } from "gatsby"
+import * as React from 'react';
+import { Link as GatsbyLink } from 'gatsby';
+import { Container, Box, Typography, Button } from '@mui/material';
 
-const pageStyles = {
-  color: "#232129",
-  padding: "96px",
-  fontFamily: "-apple-system, Roboto, sans-serif, serif",
-}
-const headingStyles = {
-  marginTop: 0,
-  marginBottom: 64,
-  maxWidth: 320,
+interface ErrorPageProps {
+  title: string;
+  message: string;
+  statusCode?: string;
 }
 
-const paragraphStyles = {
-  marginBottom: 48,
-}
-const codeStyles = {
-  color: "#8A6534",
-  padding: 4,
-  backgroundColor: "#FFF4DB",
-  fontSize: "1.25rem",
-  borderRadius: 4,
-}
+const ErrorPageLayout: React.FC<ErrorPageProps> = ({
+  title,
+  message,
+  statusCode,
+}) => {
+  const primaryColor = '#1A76D2';
+
+  return (
+    <Container maxWidth="sm">
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="90vh"
+        textAlign="center"
+        py={5}
+      >
+
+        <img src="/sgeh-not-found.png" width="400px" alt="access denied mascot" />
+
+        {statusCode && (
+          <Typography
+            variant="h1"
+            component="h1"
+            fontWeight="bold"
+            color="grey.500"
+            mb={1}
+          >
+            {statusCode}
+          </Typography>
+        )}
+
+        <Typography
+          variant="h4"
+          component="h2"
+          gutterBottom
+          fontWeight="medium"
+        >
+          {title}
+        </Typography>
+
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          mb={4}
+        >
+          {message}
+        </Typography>
+
+        <Button
+          component={GatsbyLink}
+          to="/"
+          variant="contained"
+          size="large"
+          sx={{
+            backgroundColor: primaryColor,
+            '&:hover': {
+              backgroundColor: '#115293',
+            },
+          }}
+        >
+          Go Home
+        </Button>
+      </Box>
+    </Container>
+  );
+};
 
 const NotFoundPage = () => {
   return (
-    <main style={pageStyles}>
-      <h1 style={headingStyles}>Page not found</h1>
-      <p style={paragraphStyles}>
-        Sorry 😔, we couldn’t find what you were looking for.
-        <br />
-        {process.env.NODE_ENV === "development" ? (
-          <>
-            <br />
-            Try creating a page in <code style={codeStyles}>src/pages/</code>.
-            <br />
-          </>
-        ) : null}
-        <br />
-        <Link to="/">Go home</Link>.
-      </p>
-    </main>
-  )
-}
+    <ErrorPageLayout
+      statusCode="404"
+      title="Not Found"
+      message="The page you're trying to access does not exist!"
+    />
+  );
+};
 
-export default NotFoundPage
+export default NotFoundPage;
 
-export const Head = () => <title>Not found</title>
+export const Head = () => <title>404 Not Found</title>;

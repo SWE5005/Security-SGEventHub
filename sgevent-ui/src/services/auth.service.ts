@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../state/store';
 import { commonHeader } from '../utils';
 
@@ -13,23 +13,27 @@ export const authApi = createApi({
   }),
   endpoints: builder => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
-      queryFn: async credential => {
+      queryFn: async (credential, _api, _extraOptions, _baseQuery) => {
         try {
           const token = btoa(`${credential.emailAddress}:${credential.password}`);
-          const data = await fetch(process.env.GATSBY_BACKEND_API_URL + `/api/auth/sign-in`, {
+          const response = await fetch(process.env.GATSBY_BACKEND_API_URL + `/api/auth/sign-in`, {
             method: 'POST',
             headers: {
               Authorization: `Basic ${token}`,
               'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest', // hint to prevent Spring Boot from adding WWW-Authenticate header in response
             },
+            credentials: 'include',
           });
-          if (data.ok) {
-            return { data: data.json() };
+          if (response.ok) {
+            const data: LoginResponse = await response.json();
+            return { data };
           } else {
-            return Promise.reject(data);
+            const error: FetchBaseQueryError = await response.json();
+            return { error };
           }
         } catch (error) {
-          return { error };
+          return { error: error as FetchBaseQueryError };
         }
       },
     }),
@@ -37,7 +41,7 @@ export const authApi = createApi({
     loginWithGoogle: builder.mutation<LoginResponse, void>({
       query: () => ({
         url: `/google/sign-in`,
-        method: 'POST',
+        method: 'GET',
       }),
     }),
     signUp: builder.mutation<LoginResponse, SignupRequest>({
@@ -50,7 +54,7 @@ export const authApi = createApi({
     logout: builder.mutation<string, void>({
       query: () => ({
         url: '/logout',
-        method: 'POST',
+        method: 'GET',
       }),
     }),
   }),
