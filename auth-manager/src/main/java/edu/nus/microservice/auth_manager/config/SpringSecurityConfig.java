@@ -45,7 +45,14 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+
 import java.util.List;
+import org.springframework.boot.web.servlet.ServletContextInitializer;
+import jakarta.servlet.SessionCookieConfig;
+
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -101,6 +108,27 @@ public class SpringSecurityConfig {
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
         return urlBasedCorsConfigurationSource;
     }
+
+    @Bean
+    public ServletContextInitializer servletContextInitializer() {
+        return servletContext -> {
+            SessionCookieConfig sessionCookieConfig = servletContext.getSessionCookieConfig();
+            sessionCookieConfig.setName("JSESSIONID");
+            sessionCookieConfig.setHttpOnly(true);
+            sessionCookieConfig.setSecure(true); // Must be true with SameSite=None
+            sessionCookieConfig.setPath("/");
+        };
+    }
+
+    @Bean
+    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> sameSiteCookieCustomizer() {
+        return factory -> factory.addContextCustomizers(context -> {
+            Rfc6265CookieProcessor cookieProcessor = new Rfc6265CookieProcessor();
+            cookieProcessor.setSameSiteCookies("None"); // Allow cross-origin session sharing
+            context.setCookieProcessor(cookieProcessor);
+        });
+    }
+
 
     @Order(1)
     @Bean
