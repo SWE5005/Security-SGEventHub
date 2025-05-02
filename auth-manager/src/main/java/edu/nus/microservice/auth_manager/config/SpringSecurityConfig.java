@@ -112,12 +112,13 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests.anyRequest().authenticated()
                 )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .addFilterBefore(authLoggingFilter, OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> {
 //                    oath2.loginPage("http://localhost:8000").permitAll();
                             oauth2.successHandler(customAuthSuccessHandler);
                         }
                 )
-                .addFilterBefore(authLoggingFilter, OAuth2LoginAuthenticationFilter.class)
                 .build();
     }
 
