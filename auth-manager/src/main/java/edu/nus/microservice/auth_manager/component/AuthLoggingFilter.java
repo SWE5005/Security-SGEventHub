@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,12 +13,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Component
 public class AuthLoggingFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(AuthLoggingFilter.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthLoggingFilter.class);
 
     private static final List<String> pathsToLog = List.of(
             "/api/auth/google/",
@@ -38,7 +38,7 @@ public class AuthLoggingFilter extends OncePerRequestFilter {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication != null) {
-                logger.info("Request to {} is authenticated: {}"+path+authentication.isAuthenticated());
+                logger.info("Request to {} is authenticated: {}"+path+" "+authentication.isAuthenticated());
             } else {
                 logger.info("Request to {} has no authentication"+path);
             }

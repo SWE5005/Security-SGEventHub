@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import edu.nus.microservice.auth_manager.component.AuthLoggingFilter;
 import edu.nus.microservice.auth_manager.component.CustomAuthProvider;
 import edu.nus.microservice.auth_manager.component.CustomAuthSuccessHandler;
 import edu.nus.microservice.auth_manager.config.jwtConfig.JwtAccessTokenFilter;
@@ -30,6 +31,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -65,6 +67,8 @@ public class SpringSecurityConfig {
     private final RefreshTokenRepo refreshTokenRepo;
     @Autowired
     private final LogoutHandlerServiceImpl logoutHandlerService;
+    @Autowired
+    private AuthLoggingFilter authLoggingFilter;
 
     @Value("${frontend.url}")
     private String frontendUrl;
@@ -112,7 +116,9 @@ public class SpringSecurityConfig {
 //                    oath2.loginPage("http://localhost:8000").permitAll();
                             oauth2.successHandler(customAuthSuccessHandler);
                         }
-                ).build();
+                )
+                .addFilterBefore(authLoggingFilter, OAuth2LoginAuthenticationFilter.class)
+                .build();
     }
 
     @Order(2)
