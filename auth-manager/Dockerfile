@@ -12,9 +12,11 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar auth-manager.jar
 
+
 # Add entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 8083
 ENTRYPOINT ["/app/entrypoint.sh"]
+

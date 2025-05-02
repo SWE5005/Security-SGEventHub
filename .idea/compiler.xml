@@ -8,12 +8,15 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="user-manager" />
+        <module name="db" />
         <module name="event-manager" />
+        <module name="auth-manager" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="auth-manager" options="-parameters" />
       <module name="event-manager" options="-parameters" />
       <module name="user-manager" options="-parameters" />
     </option>
