@@ -85,6 +85,7 @@ public class CustomAuthSuccessHandler
       );
       SecurityContextHolder.getContext().setAuthentication(securityAuth);
       log.info(String.valueOf(securityAuth));
+      log.info(SecurityContextHolder.getContext().toString());
       getRedirectStrategy()
               .sendRedirect(request, response, frontendUrl + "/callback");
 
