@@ -1,3 +1,5 @@
+type SgehRoles = 'END_USER' | 'EVENT_MANAGER' | 'SUPER_ADMIN';
+
 interface SgehEvent {
   id: string;
   title: string;
@@ -52,7 +54,7 @@ interface LoginResponse {
   token_type: string;
   user_name: string;
   email_address: string;
-  user_role: 'END_USER' | 'EVENT_MANAGER' | 'SUPER_ADMIN';
+  user_role: SgehRoles;
 }
 
 interface EventUserRequest {
@@ -66,7 +68,7 @@ interface SignupRequest {
   userEmail: string;
   userMobileNo: string;
   userPassword: string;
-  userRole: 'END_USER' | 'EVENT_MANAGER' | 'SUPER_ADMIN';
+  userRole: SgehRoles;
 }
 
 interface EventUserResponse {

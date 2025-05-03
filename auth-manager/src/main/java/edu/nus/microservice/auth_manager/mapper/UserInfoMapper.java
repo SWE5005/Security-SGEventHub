@@ -56,7 +56,7 @@ public class UserInfoMapper {
     userInfoEntity.setRoles(UserRoles.END_USER.name());
     userInfoEntity.setCreateDatetime(LocalDateTime.now());
     userInfoEntity.setActiveStatus("ACTIVE");
-    userInfoEntity.setPassword(passwordEncoder.encode("p@ssword123"));
+    userInfoEntity.setPassword(null);
     return userInfoEntity;
   }
 
@@ -67,11 +67,11 @@ public class UserInfoMapper {
     userInfoEntity.setId(UUID.randomUUID());
     userInfoEntity.setUsername(name);
     userInfoEntity.setEmailAddress(email);
-    userInfoEntity.setMobileNumber("00000000");
+    userInfoEntity.setMobileNumber(null);
     userInfoEntity.setRoles(UserRoles.END_USER.name());
     userInfoEntity.setCreateDatetime(LocalDateTime.now());
     userInfoEntity.setActiveStatus(UserStatus.ACTIVE.name());
-    userInfoEntity.setPassword(passwordEncoder.encode("p@ssword123"));
+    userInfoEntity.setPassword(null);
     return userInfoEntity;
   }
 }

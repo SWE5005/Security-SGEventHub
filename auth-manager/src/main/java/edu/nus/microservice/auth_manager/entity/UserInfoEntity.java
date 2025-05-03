@@ -23,7 +23,7 @@ public class UserInfoEntity {
 	@Column(name = "name", nullable = false)
 	private String username;
 
-	@Column(name = "password", nullable = false)
+	@Column(name = "password", nullable = true)
 	private String password;
 
 	@Column(name = "emailAddress", nullable = false, unique = true)
@@ -32,7 +32,7 @@ public class UserInfoEntity {
 	@Column(name = "activeStatus", nullable = false)
 	private String activeStatus;
 
-	@Column(name = "mobileNumber", nullable = false)
+	@Column(name = "mobileNumber", nullable = true)
 	private String mobileNumber;
 
 	@Column(name = "roles", nullable = false)

@@ -18,7 +18,6 @@ import java.util.UUID;
 @Builder
 public class EventEntity {
   @Id
-  @GeneratedValue(strategy= GenerationType.UUID)
   @Column(name = "id")
   private UUID id;
 
@@ -44,7 +43,7 @@ public class EventEntity {
   private int capacity;
 
   @ManyToOne
-  @JoinColumn(name = "owner_id",referencedColumnName = "id")
+  @JoinColumn(name = "owner_id", referencedColumnName = "id")
   private UserInfoEntity owner;
 
   @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

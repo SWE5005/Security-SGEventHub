@@ -27,33 +27,27 @@ public class FeedbackController {
   @PostMapping(path = "/create")
   @ResponseStatus(HttpStatus.OK)
   public ResponseEntity<?> createFeedback(
-    Authentication authentication,
-    @RequestBody FeedbackRequest feedbackRequest
-  ) {
+      Authentication authentication,
+      @RequestBody FeedbackRequest feedbackRequest) {
     log.info(
-      "[FeedbackController:createFeedback]Request to create feedback started for user: {}",
-      authentication.getName()
-    );
+        "[FeedbackController:createFeedback]Request to create feedback started for user: {}",
+        authentication.getName());
     try {
       Jwt jwt = (Jwt) authentication.getCredentials();
       String userid = (String) jwt.getClaims().get("userid");
       return ResponseEntity.ok(
-        new ApiResponse<>(
-          feedbackService.createFeedback(feedbackRequest, userid),
-          HttpStatus.OK.value(),
-          null
-        )
-      );
+          new ApiResponse<>(
+              feedbackService.createFeedback(feedbackRequest, userid),
+              HttpStatus.OK.value(),
+              null));
     } catch (Exception e) {
       log.error(
-        "[FeedbackController:createFeedback] Failed to create feedback",
-        e
-      );
+          "[FeedbackController:createFeedback] Failed to create feedback",
+          e);
       ApiResponse<String> response = new ApiResponse<>(
-        "Failed to create feedback",
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        null
-      );
+          "Failed to create feedback",
+          HttpStatus.INTERNAL_SERVER_ERROR.value(),
+          null);
       return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -61,25 +55,21 @@ public class FeedbackController {
   @PreAuthorize("hasAnyAuthority('SCOPE_USER','SCOPE_EVENT','SCOPE_READ')")
   @GetMapping(path = "/{eventId}/list")
   public ResponseEntity<?> getFeedbackList(
-    Principal principal,
-    @PathVariable @Valid @NotNull String eventId
-  ) {
+      Principal principal,
+      @PathVariable @Valid @NotNull String eventId) {
     log.info(
-      "[FeedbackController:getFeedbackList]Request to get feedback list started for user: {}",
-      principal.getName()
-    );
+        "[FeedbackController:getFeedbackList]Request to get feedback list started for event: {}",
+        eventId);
     try {
       return ResponseEntity.ok(feedbackService.getFeedbackByEventId(eventId));
     } catch (Exception e) {
       log.error(
-        "[FeedbackController:getFeedbackList] Failed to get feedback list",
-        e
-      );
+          "[FeedbackController:getFeedbackList] Failed to get feedback list",
+          e);
       ApiResponse<String> response = new ApiResponse<>(
-        "Failed to get feedback list",
-        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        null
-      );
+          "Failed to get feedback list",
+          HttpStatus.INTERNAL_SERVER_ERROR.value(),
+          null);
       return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
