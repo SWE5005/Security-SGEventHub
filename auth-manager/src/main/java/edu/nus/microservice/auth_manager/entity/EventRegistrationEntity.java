@@ -14,7 +14,6 @@ import lombok.*;
 public class EventRegistrationEntity {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id")
   private UUID id;
 
