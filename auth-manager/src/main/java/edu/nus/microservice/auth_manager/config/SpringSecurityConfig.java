@@ -142,22 +142,12 @@ public class SpringSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(new String[] { "GET", "POST" })))
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests.anyRequest().authenticated()
-                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .addFilterBefore(authLoggingFilter, OAuth2LoginAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> {
                     // oath2.loginPage("http://localhost:8000").permitAll();
                     oauth2.successHandler(customAuthSuccessHandler);
                 }).build();
-//                    oath2.loginPage("http://localhost:8000").permitAll();
-                            oauth2.successHandler(customAuthSuccessHandler);
-                        }
-                )
-                .build();
     }
 
     @Order(2)
