@@ -109,7 +109,7 @@ public class SpringSecurityConfig {
                 .securityMatcher("/api/auth/google/**", "/oauth2/**", "/login/oauth2/**")
                 .cors(cors -> cors.configurationSource(corsConfigurationSource(new String[] { "GET", "POST" })))
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .authorizeRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
                 .oauth2Login(oauth2 -> {
                     // oath2.loginPage("http://localhost:8000").permitAll();
                     oauth2.successHandler(customAuthSuccessHandler);
