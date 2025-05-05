@@ -1,5 +1,6 @@
 package edu.nus.microservice.auth_manager.entity;
 
+import edu.nus.microservice.auth_manager.component.EncryptAttributeConverter;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -26,6 +27,7 @@ public class UserInfoEntity {
 	@Column(name = "password", nullable = true)
 	private String password;
 
+	@Convert(converter = EncryptAttributeConverter.class)
 	@Column(name = "emailAddress", nullable = false, unique = true)
 	private String emailAddress;
 
