@@ -9,6 +9,10 @@ export default function SignUpPage() {
   const [userEmail, setEmailAddress] = useState('');
   const [userPassword, setPassword] = useState('');
   const [userMobileNo, setMobile] = useState('');
+  const [nameError, setNameError] = useState<boolean | string>(false);
+  const [emailError, setEmailError] = useState<boolean | string>(false);
+  const [passwordError, setPasswordError] = useState<boolean | string>(false);
+  const [mobileNoError, setMobileError] = useState<boolean | string>(false);
   const [signUp, result] = useSignUpMutation();
 
   const handleSignUp = () => {
@@ -38,7 +42,16 @@ export default function SignUpPage() {
             label="User Name"
             variant="outlined"
             value={userName}
-            onChange={e => setUserName(e.target.value)}
+            error={!!nameError}
+            helperText={nameError}
+            onChange={e => {
+              setUserName(e.target.value);
+              if (e.target.value.length >= 1) {
+                setNameError(false);
+              } else {
+                setNameError('User name is required.');
+              }
+            }}
             margin="normal"
           />
         </Grid>
@@ -50,7 +63,19 @@ export default function SignUpPage() {
             variant="outlined"
             type="email"
             value={userEmail}
-            onChange={e => setEmailAddress(e.target.value)}
+            inputProps={{
+              type: 'email',
+            }}
+            error={!!emailError}
+            helperText={emailError}
+            onChange={e => {
+              setEmailAddress(e.target.value);
+              if (e.target.validity.valid) {
+                setEmailError(false);
+              } else {
+                setEmailError('Please provide valid email address.');
+              }
+            }}
             margin="normal"
           />
         </Grid>
@@ -62,7 +87,16 @@ export default function SignUpPage() {
             variant="outlined"
             type="text"
             value={userMobileNo}
-            onChange={e => setMobile(e.target.value)}
+            error={!!mobileNoError}
+            helperText={mobileNoError}
+            onChange={e => {
+              setMobile(e.target.value);
+              if (e.target.value.length == 8 && !isNaN(Number(e.target.value))) {
+                setMobileError(false);
+              } else {
+                setMobileError('Please provide valid singapore mobile number.');
+              }
+            }}
             margin="normal"
           />
         </Grid>
@@ -74,7 +108,18 @@ export default function SignUpPage() {
             variant="outlined"
             type="password"
             value={userPassword}
-            onChange={e => setPassword(e.target.value)}
+            error={!!passwordError}
+            helperText={passwordError}
+            onChange={e => {
+              setPassword(e.target.value);
+              if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(e.target.value)) {
+                setPasswordError(
+                  'Invalid password, your password must be: Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character',
+                );
+              } else {
+                setPasswordError(false);
+              }
+            }}
             margin="normal"
           />
         </Grid>
