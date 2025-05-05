@@ -34,6 +34,7 @@ public class UserInfoEntity {
 	@Column(name = "activeStatus", nullable = false)
 	private String activeStatus;
 
+	@Convert(converter = EncryptAttributeConverter.class)
 	@Column(name = "mobileNumber", nullable = true)
 	private String mobileNumber;
 
