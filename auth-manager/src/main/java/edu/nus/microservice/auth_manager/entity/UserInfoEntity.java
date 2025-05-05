@@ -27,7 +27,7 @@ public class UserInfoEntity {
 	@Column(name = "password", nullable = true)
 	private String password;
 
-	@Convert(converter = EncryptAttributeConverter.class)
+//	@Convert(converter = EncryptAttributeConverter.class)
 	@Column(name = "emailAddress", nullable = false, unique = true)
 	private String emailAddress;
 
