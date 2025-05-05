@@ -14,13 +14,7 @@ public class EncryptionMigrationRunner implements CommandLineRunner {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private final UserInfoEntity userInfoEntity;
     private final EncryptAttributeConverter converter = new EncryptAttributeConverter();
-
-    public EncryptionMigrationRunner(UserInfoEntity userInfoEntity) {
-        this.userInfoEntity = userInfoEntity;
-    }
 
     @Override
     public void run(String... args) throws Exception {
