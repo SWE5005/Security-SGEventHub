@@ -29,7 +29,7 @@
     "@types/js-cookie": "^3.0.6",
     "cookie-parser": "^1.4.7",
     "dayjs": "^1.11.10",
-    "gatsby": "^5.13.2",
+    "gatsby": "^5.16.1",
     "gatsby-plugin-s3": "^0.4.1",
     "gatsby-plugin-sitemap": "^6.13.1",
     "http-proxy-middleware": "^2.0.9",
